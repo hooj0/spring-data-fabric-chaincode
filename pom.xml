@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>spring.data.fabric.chaincode</groupId>
+	<artifactId>spring-data-fabric-chaincode-parent</artifactId>
+	<version>1.0.1-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>Spring Data Hyperledger Fabric Chaincode SDK</name>
+	<description>Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK.</description>
+	<url>https://github.com/hooj0/spring-data-fabric-chaincode</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Spring data fabric chaincode Developers</name>
+			<email>hoojo_@126.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:github.com/hooj0/spring-data-fabric-chaincode.git</connection>
+		<developerConnection>scm:git:github.com/hooj0/spring-data-fabric-chaincode.git</developerConnection>
+		<url>https://github.com/hooj0/spring-data-fabric-chaincode.git</url>
+	</scm>
+
+	<properties>
+		<!-- compiler -->
+		<java.version>1.8</java.version>
+
+		<!-- Spring -->
+		<spring-framework.version>5.0.2.RELEASE</spring-framework.version>
+		<spring-data.version>2.1.0.BUILD-SNAPSHOT</spring-data.version>
+
+		<cdi.version>1.0</cdi.version>
+		<lombok.version>1.18.0</lombok.version>
+		<joda-time.version>2.10</joda-time.version>
+
+		<!-- google -->
+		<guava.version>25.1-jre</guava.version>
+
+		<!-- apache -->
+		<commons-lang.version>3.7</commons-lang.version>
+
+		<!-- Logging -->
+		<logback.version>1.0.13</logback.version>
+		<slf4j.version>1.7.5</slf4j.version>
+
+		<!-- Test -->
+		<junit.version>4.12</junit.version>
+	</properties>
+
+	<modules>
+		<module>spring-data-fabric-chaincode</module>
+		<module>spring-data-fabric-chaincode-examples</module>
+	</modules>
+
+	<build>
+		<resources>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+				<excludes>
+					<exclude>test/**</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
