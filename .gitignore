@@ -18,6 +18,7 @@
 *.zip
 *.tar.gz
 *.rar
+
 target/*
 */target/*
 */target
@@ -28,3 +29,4 @@ hs_err_pid*
 .settings
 .settings/*
 */.settings/*
+
