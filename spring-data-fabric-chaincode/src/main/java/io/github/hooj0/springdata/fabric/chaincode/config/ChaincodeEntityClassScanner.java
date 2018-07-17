@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Table;
 
+import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
+
 /**
  * 扫描 Chaincode 实体的包。 实体扫描程序使用基本包名称，
  * 基本包类或两者来扫描类路径上使用{@link #getEntityAnnotations() 实体注释}注释的实体类。
@@ -213,6 +215,6 @@ public class ChaincodeEntityClassScanner {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Class<? extends Annotation>[] getEntityAnnotations() {
-		return new Class[] { Model.class, Persistent.class };
+		return new Class[] { Entity.class, Persistent.class };
 	}
 }
