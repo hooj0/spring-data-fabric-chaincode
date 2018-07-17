@@ -22,7 +22,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Install;
 public class AnnotationedRepositoryTests {
 
 	@Chaincode(channel = "mychannel", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
-	interface Repo {
+	interface GoRepo {
 		
 		@Install
 		public void installChaincode(String ccPath);
@@ -32,5 +32,10 @@ public class AnnotationedRepositoryTests {
 
 		@Install
 		public void installChaincode(InputStream ccStream);
+	}
+	
+	@Chaincode(channel = "mychannel", name = "mycc", type = Type.NODE, version = "1.1")
+	interface NodeRepo extends GoRepo {
+		
 	}
 }
