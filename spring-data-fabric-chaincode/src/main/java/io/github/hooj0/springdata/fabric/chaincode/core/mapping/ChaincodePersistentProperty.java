@@ -23,6 +23,8 @@ public interface ChaincodePersistentProperty extends PersistentProperty<Chaincod
 
 	String getFieldName();
 	
+	boolean isFieldProperty();
+	
 	boolean isTransientProperty();
 	
 	String getTransientKey();

@@ -16,7 +16,6 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Field;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.Transaction;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +38,8 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	
 	private ApplicationContext context;
 
-	private boolean isTransientProperty = false;
+	private boolean isFieldProperty;
+	private boolean isTransientProperty;
 	private String transientKey;
 	
 	static {
@@ -52,17 +52,23 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	
 	public SimpleChaincodePersistentProperty(Property property, PersistentEntity<?, ChaincodePersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
 		super(property, owner, simpleTypeHolder);
-		log.debug("property: {}, filed: {}", property.getName(), property.getField());
+		log.debug("Added property: {}, filed: {}", property.getName(), property.getField());
 		
 		if (isAnnotationPresent(Field.class)) {
 			Field field = findAnnotation(Field.class);
-			if (field != null && field.transientField()) {
+			
+			if (field != null) {
+				isFieldProperty = true;
+			}
+			
+			if (isFieldProperty && field.transientField()) {
 				isTransientProperty = true;
 				transientKey = StringUtils.defaultString(field.transientAlias(), getFieldName());
 			} else {
 				isTransientProperty = false;
 			}
-		} else if (isAnnotationPresent(Transaction.class)) {
+		} else if (isAnnotationPresent(Transient.class)) {
+			
 			Transient transientField = findAnnotation(Transient.class);
 			if (transientField != null) {
 				isTransientProperty = true;
@@ -74,13 +80,19 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 		
 		/*
 		Field field = AnnotatedElementUtils.findMergedAnnotation(property.getType(), Field.class);
-		if (field != null && field.transientField()) {
+		if (field != null) {
+			isFieldProperty = true;
+		}
+		
+		if (isFieldProperty && field.transientField()) {
 			isTransientProperty = true;
 			transientKey = field.transientAlias();
 		} else {
 			isTransientProperty = false;
 		}
 		*/
+		
+		log.debug("isTransientProperty: {}, transientKey: {}", isTransientProperty, transientKey);
 	}
 	
 	@Override
@@ -101,7 +113,8 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	@Override
 	protected Association<ChaincodePersistentProperty> createAssociation() {
 		Assert.isTrue(context != null, "contxt not null");
-		return null;
+		
+		return new Association<ChaincodePersistentProperty>(this, null);
 	}
 
 	@Override
@@ -117,5 +130,10 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	@Override
 	public String getTransientKey() {
 		return transientKey;
+	}
+
+	@Override
+	public boolean isFieldProperty() {
+		return isFieldProperty;
 	}
 }
