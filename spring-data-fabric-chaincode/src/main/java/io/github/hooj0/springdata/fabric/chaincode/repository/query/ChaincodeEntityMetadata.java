@@ -15,4 +15,7 @@ import org.springframework.data.repository.core.EntityMetadata;
  */
 public interface ChaincodeEntityMetadata<T> extends EntityMetadata<T> {
 
+	String getEntityName();
+	
+	//XXX public String getChaincodeName();
 }
