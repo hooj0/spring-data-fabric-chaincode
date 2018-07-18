@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.annotations;
+package io.github.hooj0.springdata.fabric.chaincode.annotations.repository;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

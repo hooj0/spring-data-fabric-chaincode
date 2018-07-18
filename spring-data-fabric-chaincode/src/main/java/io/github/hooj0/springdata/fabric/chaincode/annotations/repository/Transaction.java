@@ -1,7 +1,7 @@
-package io.github.hooj0.springdata.fabric.chaincode.annotations;
+package io.github.hooj0.springdata.fabric.chaincode.annotations.repository;
 
 /**
- * <b>function:</b>
+ * Chaincode智能合约 交易请求
  * @author hoojo
  * @createDate 2018年7月16日 下午5:18:14
  * @file Transaction.java

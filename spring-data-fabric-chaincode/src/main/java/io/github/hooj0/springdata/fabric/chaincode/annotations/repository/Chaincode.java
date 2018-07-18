@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.annotations;
+package io.github.hooj0.springdata.fabric.chaincode.annotations.repository;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -30,7 +30,7 @@ import org.springframework.core.annotation.AliasFor;
 public @interface Chaincode {
 
 	/** chaincode 通道名称 */
-	@AliasFor(annotation = Channel.class)
+	@AliasFor(annotation = Channel.class, attribute = "name")
 	String channel();
 	
 	/** chaincode 合约名称 */

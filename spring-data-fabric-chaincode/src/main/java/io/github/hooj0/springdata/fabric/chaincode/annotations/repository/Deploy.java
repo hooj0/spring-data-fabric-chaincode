@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.annotations;
+package io.github.hooj0.springdata.fabric.chaincode.annotations.repository;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.github.hooj0.springdata.fabric.chaincode.enums.Mode;
+import io.github.hooj0.springdata.fabric.chaincode.enums.DeployMode;
 
 /**
  * <b>function:</b> 部署合约chaincode，包括安装、实例化、升级
@@ -25,5 +25,5 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.Mode;
 public @interface Deploy {
 
 	/** 部署模式 */
-	Mode mode() default Mode.INSTALL;
+	DeployMode mode() default DeployMode.INSTALL;
 }
