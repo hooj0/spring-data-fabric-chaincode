@@ -1,6 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.cdi;
 
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -8,6 +9,8 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 
 import org.springframework.data.repository.cdi.CdiRepositoryBean;
+import org.springframework.data.repository.config.CustomRepositoryImplementationDetector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
@@ -30,19 +33,18 @@ public class ChaincodeRepositoryBean<T> extends CdiRepositoryBean<T> {
 
 	private final Bean<ChaincodeOperations> operationsBean;
 	
-	public ChaincodeRepositoryBean(Bean<ChaincodeOperations> operations, Set<Annotation> qualifiers, Class<T> repositoryType, BeanManager beanManager) {
-		super(qualifiers, repositoryType, beanManager);
-		
-		Assert.notNull(operations, "Cannot create repository with 'null' for TemplateOperations.");
+	public ChaincodeRepositoryBean(Bean<ChaincodeOperations> operations, Set<Annotation> qualifiers, Class<T> repositoryType, BeanManager beanManager, @Nullable CustomRepositoryImplementationDetector detector) {
+		super(qualifiers, repositoryType, beanManager, Optional.of(detector));
+
+		Assert.notNull(operations, "Cannot create repository with 'null' for ChaincodeOperations.");
 		this.operationsBean = operations;
 	}
 
 	@Override
 	protected T create(CreationalContext<T> creationalContext, Class<T> repositoryType) {
-
 		ChaincodeOperations chaincodeOperations = getDependencyInstance(operationsBean, ChaincodeOperations.class);
 
-		return create(() -> new ChaincodeRepositoryFactory(chaincodeOperations), repositoryType);
+		return create(() -> new ChaincodeRepositoryFactory(repositoryType, chaincodeOperations), repositoryType);
 	}
 	
 	@Override
