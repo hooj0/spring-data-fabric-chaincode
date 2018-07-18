@@ -3,15 +3,9 @@ package io.github.hooj0.springdata.fabric.chaincode.config;
 import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 
 import com.google.common.collect.Table;
-
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
-import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
-import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
 
 /**
  * <b>function:</b> 智能合约 抽象基础配置
@@ -24,36 +18,9 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeM
  * @email hoojo_@126.com
  * @version 1.0
  */
-public class AbstractChaincodeConfiguration implements BeanClassLoaderAware {
+public abstract class AbstractChaincodeConfiguration implements BeanClassLoaderAware {
 
 	private @Nullable ClassLoader beanClassLoader;
-	
-	@Bean
-	public SimpleChaincodeMappingContext mappingContext() throws ClassNotFoundException {
-		SimpleChaincodeMappingContext mappingContext = new SimpleChaincodeMappingContext();
-		mappingContext.setInitialEntitySet(getInitialEntitySet());
-
-		return mappingContext;
-	}
-	
-	@Bean
-	public MappingChaincodeConverter mappingConverter() throws ClassNotFoundException {
-		
-		MappingChaincodeConverter converter = new MappingChaincodeConverter(mappingContext());
-		return converter;
-	}
-	
-	@Bean
-	public ChaincodeTemplate chaincodeTemplate() {
-		return new ChaincodeTemplate();
-	}
-	
-	@Bean
-	public ChaincodeOperations chaincodeOperations() throws ClassNotFoundException {
-		
-		return null;
-		//return this.chaincodeTemplate();
-	}
 	
 	/**
 	 *  基本包以扫描使用{@link Table}注释注释的实体。

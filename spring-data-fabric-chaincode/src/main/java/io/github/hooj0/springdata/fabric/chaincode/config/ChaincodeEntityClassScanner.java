@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.inject.Model;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -210,7 +208,7 @@ public class ChaincodeEntityClassScanner {
 
 	/**
 	 * @return entity annotations.
-	 * @see Model
+	 * @see Entity
 	 * @see Persistent
 	 */
 	@SuppressWarnings("unchecked")
