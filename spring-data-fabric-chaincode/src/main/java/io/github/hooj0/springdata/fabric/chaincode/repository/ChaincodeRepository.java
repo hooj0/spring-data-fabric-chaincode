@@ -36,4 +36,6 @@ public interface ChaincodeRepository<T> extends Repository<T, Object> {
 	public String invoke(String func, String... args);
 	
 	public String query(String func, String... args);
+	
+	public Class<T> getEntityClass();
 }
