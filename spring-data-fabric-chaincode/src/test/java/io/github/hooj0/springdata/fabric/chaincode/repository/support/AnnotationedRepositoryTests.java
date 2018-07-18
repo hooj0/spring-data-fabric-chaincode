@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import org.hyperledger.fabric.sdk.TransactionRequest.Type;
 
-import io.github.hooj0.springdata.fabric.chaincode.annotations.Chaincode;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.Install;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
 
 /**
  * <b>function:</b> AnnotationedRepositoryTests
