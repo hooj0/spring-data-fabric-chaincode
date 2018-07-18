@@ -15,6 +15,7 @@ import org.springframework.data.convert.CustomConversions;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.lang.Nullable;
 
+import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty.PropertyToFieldNameConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodeSimpleTypeHolder;
 
 /**
@@ -37,10 +38,12 @@ public class ChaincodeCustomConversions extends CustomConversions {
 		List<Object> converters = new ArrayList<>();
 
 		converters.add(CustomToStringConverter.INSTANCE);
+		converters.add(PropertyToFieldNameConverter.INSTANCE);
 		converters.addAll(ByteStringConverters.getConvertersToRegister());
 		converters.addAll(DateTimeConverters.getConvertersToRegister());
 
 		STORE_CONVERTERS = Collections.unmodifiableList(converters);
+		// STORE_CONVERSIONS = StoreConversions.of(ChaincodeSimpleTypeHolder.HOLDER, STORE_CONVERTERS);
 		STORE_CONVERSIONS = StoreConversions.of(ChaincodeSimpleTypeHolder.DEFAULT, STORE_CONVERTERS);
 	}
 
