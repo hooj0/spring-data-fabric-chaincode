@@ -3,12 +3,13 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.data.repository.core.RepositoryInformation;
 import org.springframework.data.repository.core.RepositoryMetadata;
@@ -20,10 +21,17 @@ import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
 
+import com.google.common.collect.Maps;
+
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
+import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
+import io.github.hooj0.springdata.fabric.chaincode.repository.query.PartTreeChaincodeQuery;
+import io.github.hooj0.springdata.fabric.chaincode.repository.query.StringBasedChaincodeQuery;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,15 +50,28 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 
 	private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser();
 	
-	private final ChaincodeOperations operations;
+	private Map<String, Object> chaincodeInformation = Maps.newConcurrentMap();
+	
 	private final ChaincodeEntityInformationCreator entityInformationCreator;
+	private final ChaincodeOperations operations;
 	
-	
-	public ChaincodeRepositoryFactory(ChaincodeOperations operations) {
+	public ChaincodeRepositoryFactory(Class<?> repositoryInterface, ChaincodeOperations operations) {
 		Assert.notNull(operations, "ChaincodeOperations must not be null!");
+		Assert.notNull(repositoryInterface, "repositoryInterface must not be null!");
 		
 		this.operations = operations;
 		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
+
+		log.debug("Creating chaincode bean factory");
+		
+		Channel channel = AnnotationUtils.findAnnotation(repositoryInterface, Channel.class);
+		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
+		
+		chaincodeInformation.put("channel", channel.name());
+		chaincodeInformation.put("chaincodeName", chaincode.name());
+		chaincodeInformation.put("chaincodePath", chaincode.path());
+		chaincodeInformation.put("chaincodePath", chaincode.type());
+		chaincodeInformation.put("chaincodeVersion", chaincode.version());
 	}
 	
 	@Override
@@ -60,11 +81,12 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 
 	@Override
 	protected Object getTargetRepository(RepositoryInformation metadata) {
+		// XXX new SimpleChaincodeRepository<T>();
 		return getTargetRepositoryViaReflection(metadata, getEntityInformation(metadata.getDomainType()), operations);
 	}
 
 	/**
-	 * 针对不同类型的metadata 可以返回对应的 repo.class
+	 * 针对不同类型的 metadata 可以返回对应的 repo.class
 	 * @author hoojo
 	 * @createDate 2018年7月4日 下午4:47:32
 	 */
@@ -75,17 +97,21 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		}
 
 		log.debug("IdType: {}", metadata.getIdType());
+		if (String.class.isAssignableFrom(metadata.getIdType())) {
+			return SimpleChaincodeRepository.class;
+		} else if (metadata.getIdType() == Object.class) {
+			return SimpleChaincodeRepository.class;
+		} 
 		
-		/* if (Integer.class.isAssignableFrom(metadata.getIdType()) || Long.class.isAssignableFrom(metadata.getIdType()) || Double.class.isAssignableFrom(metadata.getIdType())) {
-			return NumberKeyedRepository.class;
-		} else if (metadata.getIdType() == String.class) {
-			return SimpleTemplateRepository.class;
-		} else if (metadata.getIdType() == UUID.class) {
-			return UUIDTemplateRepository.class;
-		} */
-		
-		throw new IllegalArgumentException("UnSupport has not been implemented yet.");
+		throw new IllegalArgumentException("Unknow Support has not been implemented yet.");
 	}
+	
+	@Override
+    public <T> T getRepository(Class<T> repositoryInterface) {
+        log.debug("Creating proxy for {}", repositoryInterface.getSimpleName());
+
+        return super.getRepository(repositoryInterface);
+    }
 	
 	/**
 	 * Querydsl 类型的查询 repo
@@ -100,6 +126,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key, QueryMethodEvaluationContextProvider evaluationContextProvider) {
+		// 可以根据配置不同的key 适配不同的 EnableChaincodeRepositories.queryLookupStrategy()
 		log.debug("key: {}", key);
 		
 		return Optional.of(new ChaincodeQueryLookupStrategy(operations, evaluationContextProvider, operations.getConverter().getMappingContext()));
@@ -123,8 +150,8 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		@Override
 		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory, NamedQueries namedQueries) {
 
-			//ChaincodeQueryMethod queryMethod = new ChaincodeQueryMethod(method, metadata, factory, mappingContext);
-			/*String namedQueryName = queryMethod.getNamedQueryName();
+			ChaincodeQueryMethod queryMethod = new ChaincodeQueryMethod(method, metadata, factory, mappingContext);
+			String namedQueryName = queryMethod.getNamedQueryName();
 
 			log.debug("queryMethod.getName: {}", queryMethod.getName());
 			log.debug("queryMethod: {}", queryMethod);
@@ -136,12 +163,11 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 			if (namedQueries.hasQuery(namedQueryName)) {
 				String namedQuery = namedQueries.getQuery(namedQueryName);
 				return new StringBasedChaincodeQuery(namedQuery, queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
-			} else if (queryMethod.hasAnnotatedQuery()) {
+			} else if (!queryMethod.hasDeployAnnotated()) {
 				return new StringBasedChaincodeQuery(queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
 			} else {
 				return new PartTreeChaincodeQuery(queryMethod, operations);
-			}*/
-			return null;
+			}
 		}
 	}
 }

@@ -23,17 +23,19 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepositor
  */
 public class ChaincodeRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> extends RepositoryFactoryBeanSupport<T, S, ID> {
 
+	private final Class<? extends T> repositoryInterface;
 	private @Nullable ChaincodeOperations operations;
 	
 	protected ChaincodeRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
 		super(repositoryInterface);
+		
+		this.repositoryInterface = repositoryInterface;
 	}
 
 	@Override
 	protected RepositoryFactorySupport createRepositoryFactory() {
-		Assert.state(operations != null, "ChaincodeOperations must not be null");
 
-		return new ChaincodeRepositoryFactory(operations);
+		return new ChaincodeRepositoryFactory(repositoryInterface, operations);
 	}
 	
 	public void setChaincodeOperations(ChaincodeOperations operations) {

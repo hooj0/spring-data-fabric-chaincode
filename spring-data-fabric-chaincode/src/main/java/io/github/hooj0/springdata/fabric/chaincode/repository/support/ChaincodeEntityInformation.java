@@ -17,4 +17,5 @@ import org.springframework.data.repository.core.EntityMetadata;
  */
 public interface ChaincodeEntityInformation<T, ID> extends EntityInformation<T, ID>, EntityMetadata<T> {
 
+	//XXX public String getChannelName();
 }

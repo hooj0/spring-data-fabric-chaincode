@@ -43,8 +43,15 @@ public class MappingChaincodeEntityInformation<T, ID> extends PersistentEntityIn
 	}
 	
 	public void out() {
+		log.debug("entityMetadata name: {}", entityMetadata.getName());
 		log.debug("entityName: {}", entityName);
 		log.debug("entityMetadata: {}", entityMetadata);
 		log.debug("converter: {}", converter);
+	}
+
+	// XXX
+	public String getChaincodeName() {
+		
+		return null;
 	}
 }
