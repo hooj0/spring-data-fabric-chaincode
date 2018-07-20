@@ -26,12 +26,12 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
 @Documented
-@Channel
+@Channel(name = "")
 public @interface Chaincode {
 
 	/** chaincode 通道名称 */
 	@AliasFor(annotation = Channel.class, attribute = "name")
-	String channel();
+	String channel() default "";
 	
 	/** chaincode 合约名称 */
 	String name();

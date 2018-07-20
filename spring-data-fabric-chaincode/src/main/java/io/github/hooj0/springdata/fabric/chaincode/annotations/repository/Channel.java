@@ -1,5 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.annotations.repository;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -17,11 +18,12 @@ import java.lang.annotation.Target;
  * @email hoojo_@126.com
  * @version 1.0
  */
-@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
+@Inherited
+@Documented
 public @interface Channel {
 
 	/** 通道名称  */
-	String name() default "";
+	String name();
 }
