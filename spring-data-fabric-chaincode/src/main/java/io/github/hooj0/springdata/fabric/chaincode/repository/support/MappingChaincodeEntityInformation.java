@@ -5,7 +5,6 @@ import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
-import io.github.hooj0.springdata.fabric.chaincode.repository.information.RepositoryAannotaitonInformation;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,12 +20,11 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  */
 @Slf4j
+@SuppressWarnings("unused")
 public class MappingChaincodeEntityInformation<T, ID> extends PersistentEntityInformation<T, ID> implements ChaincodeEntityInformation<T, ID> {
 
 	private final ChaincodePersistentEntity<T> entityMetadata;
 	private final ChaincodeConverter converter;
-	
-	private RepositoryAannotaitonInformation repositoryAannotaitonInformation;
 	
 	public MappingChaincodeEntityInformation(ChaincodePersistentEntity<T> entity, ChaincodeConverter converter) {
 		super(entity);
@@ -36,23 +34,5 @@ public class MappingChaincodeEntityInformation<T, ID> extends PersistentEntityIn
 
 		this.entityMetadata = entity;
 		this.converter = converter;
-	}
-	
-	public void out() {
-		log.debug("entityMetadata name: {}", entityMetadata.getName());
-		log.debug("repositoryAannotaitonInformation: {}", repositoryAannotaitonInformation);
-		log.debug("entityMetadata: {}", entityMetadata);
-		log.debug("converter: {}", converter);
-	}
-
-	@Override
-	public RepositoryAannotaitonInformation getRepositoryAannotaitonInformation() {
-		return repositoryAannotaitonInformation;
-	}
-
-	public void setRepositoryAannotaitonInformation(RepositoryAannotaitonInformation repositoryAannotaitonInformation) {
-		Assert.notNull(repositoryAannotaitonInformation, "RepositoryAannotaitonInformation must not be null!");
-
-		this.repositoryAannotaitonInformation = repositoryAannotaitonInformation;
 	}
 }
