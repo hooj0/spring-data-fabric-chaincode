@@ -33,6 +33,10 @@ public @interface Chaincode {
 	@AliasFor(annotation = Channel.class, attribute = "name")
 	String channel() default "";
 	
+	/** 智能合约所在 认证组织 */
+	@AliasFor(annotation = Channel.class, attribute = "orgs")
+	String[] orgs() default {};
+	
 	/** chaincode 合约名称 */
 	String name();
 	

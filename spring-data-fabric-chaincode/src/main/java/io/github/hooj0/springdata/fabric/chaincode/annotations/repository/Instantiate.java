@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.annotation.QueryAnnotation;
 
-import io.github.hooj0.springdata.fabric.chaincode.enums.DeployMode;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
@@ -23,8 +22,7 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
  * @email hoojo_@126.com
  * @version 1.0
  */
-@Deploy(mode = DeployMode.INSTANTIATE)
-@Proposal(type = ProposalType.INSTANTIATE)
+@Deploy(mode = ProposalType.INSTANTIATE)
 @QueryAnnotation
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

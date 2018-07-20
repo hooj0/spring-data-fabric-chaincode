@@ -24,6 +24,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Channel {
 
-	/** 通道名称  */
+	/** 智能合约运行 通道名称  */
 	String name();
+	
+	/** 智能合约所在 认证组织 */
+	String[] orgs() default {};
 }

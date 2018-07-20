@@ -22,8 +22,7 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
  * @email hoojo_@126.com
  * @version 1.0
  */
-@Deploy
-@Proposal(type = ProposalType.INSTALL)
+@Deploy(mode = ProposalType.INSTALL)
 @QueryAnnotation
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

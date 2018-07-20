@@ -6,7 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.github.hooj0.springdata.fabric.chaincode.enums.DeployMode;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.data.annotation.QueryAnnotation;
+
+import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
  * <b>function:</b> 部署合约chaincode，包括安装、实例化、升级
@@ -19,11 +22,14 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.DeployMode;
  * @email hoojo_@126.com
  * @version 1.0
  */
+@Proposal
+@QueryAnnotation
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
 @Documented
 public @interface Deploy {
 
 	/** 部署模式 */
-	DeployMode mode() default DeployMode.INSTALL;
+	@AliasFor(annotation = Proposal.class, attribute = "type")
+	ProposalType mode() default ProposalType.INSTALL;
 }
