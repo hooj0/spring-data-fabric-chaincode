@@ -66,9 +66,6 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		
 		if (method.hasInstallAnnotated()) {
 			System.err.println("install: " + method.getChannelAnnotated());
-			
-			CriteriaBuilder.newBuilder().channel(method.getChannelAnnotated().name()).build();
-			
 		} else if (method.hasInstantiateAnnotated()) {
 			System.err.println("Instantiate: " + method.getChannelAnnotated());
 		} else if (method.hasInstantiateAnnotated()) {

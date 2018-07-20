@@ -3,8 +3,6 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.core.EntityMetadata;
 
-import io.github.hooj0.springdata.fabric.chaincode.repository.information.RepositoryAannotaitonInformation;
-
 /**
  * 扩展EntityMetadata以添加查询实体实例信息的功能
  * 
@@ -19,5 +17,4 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.information.Reposi
  */
 public interface ChaincodeEntityInformation<T, ID> extends EntityInformation<T, ID>, EntityMetadata<T> {
 
-	public RepositoryAannotaitonInformation getRepositoryAannotaitonInformation();
 }
