@@ -1,6 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 
 /**
  * Chaincode Repository Simple Implements
@@ -15,10 +16,10 @@ import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
  */
 public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T> {
 
-	public SimpleChaincodeRepository(ChaincodeEntityInformation<T, ?> metadata, ChaincodeOperations operations) {
-		super(metadata, operations);
+	public SimpleChaincodeRepository(Criteria globalCriteria, ChaincodeEntityInformation<T, ?> metadata, ChaincodeOperations operations) {
+		super(globalCriteria, metadata, operations);
 	}
-
+	
 	public SimpleChaincodeRepository(ChaincodeOperations operations) {
 		super(operations);
 	}
