@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
+import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
 import io.github.hooj0.springdata.fabric.chaincode.entity.BaseEntity;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,11 +32,21 @@ public class MappingChaincodeConverter extends AbstractChaincodeConverter implem
 	private final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 	private ApplicationContext applicationContext;
 	
+	public MappingChaincodeConverter() {
+		this(newDefaultMappingContext());
+	}
+	
 	public MappingChaincodeConverter(MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext) {
 		super(new DefaultConversionService());
 		Assert.notNull(mappingContext, "MappingContext must not be null!");
 		
 		this.mappingContext = mappingContext;
+	}
+	
+	private static SimpleChaincodeMappingContext newDefaultMappingContext() {
+		SimpleChaincodeMappingContext mappingContext = new SimpleChaincodeMappingContext();
+
+		return mappingContext;
 	}
 	
 	@Override
