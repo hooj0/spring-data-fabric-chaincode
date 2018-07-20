@@ -15,6 +15,8 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import com.google.common.collect.Maps;
+
 import io.github.hooj0.springdata.fabric.chaincode.ChaincodeMappingException;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
@@ -37,10 +39,14 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 	private final StandardEvaluationContext context;
 	private final SpelExpressionParser parser;
 	
+	private Map<String, String> fieldMappings = Maps.newHashMap();
+	private Map<String, String> transientMappings = Maps.newHashMap();
+	private Map<String, ChaincodePersistentProperty> transientProperties = Maps.newHashMap();
+	
 	public SimpleChaincodePersistentEntity(TypeInformation<T> information) {
 		super(information);
 		
-		log.debug("Add Chaincode Persistent Entity: {}", information.getType());
+		log.debug("Add Chaincode Persistent Entity: {}", information.getType().getSimpleName());
 		
 		this.context = new StandardEvaluationContext();
 		this.parser = new SpelExpressionParser();
@@ -49,7 +55,7 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 		Class<T> clazz = information.getType();
 		if (clazz.isAnnotationPresent(Entity.class)) {
 			Entity entity = clazz.getAnnotation(Entity.class);
-			log.debug("@Entity: {}", entity);
+			log.trace("Add annotated @Entity: {}", entity);
 		} else {
 			throw new ChaincodeMappingException(clazz.getSimpleName() + " -> No added @Entity annotation!");
 		}
@@ -60,7 +66,12 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 		super.addPersistentProperty(property);
 		
 		if (property.isTransientProperty()) {
-			
+			transientProperties.put(property.getTransientKey(), property);
+			transientMappings.put(property.getFieldName(), property.getTransientKey());
+		}
+		
+		if (property.isFieldProperty()) {
+			fieldMappings.put(property.getFieldName(), property.getMappingName());
 		}
 	}
 
@@ -114,16 +125,16 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 
 	@Override
 	public Map<String, ChaincodePersistentProperty> getTransientProperties() {
-		return null;
+		return transientProperties;
 	}
 
 	@Override
 	public Map<String, String> getTransientMappings() {
-		return null;
+		return transientMappings;
 	}
 
 	@Override
 	public Map<String, String> getFieldMappings() {
-		return null;
+		return fieldMappings;
 	}
 }

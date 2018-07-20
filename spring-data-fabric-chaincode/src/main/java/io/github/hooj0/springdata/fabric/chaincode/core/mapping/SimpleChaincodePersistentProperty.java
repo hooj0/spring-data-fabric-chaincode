@@ -41,7 +41,9 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 
 	private boolean isFieldProperty;
 	private boolean isTransientProperty;
+	
 	private String transientKey;
+	private String mappingName;
 	
 	static {
 		SUPPORTED_ID_TYPES.add(String.class);
@@ -60,6 +62,9 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 		
 		if (isTransientProperty) {
 			log.debug("isTransientProperty: {}, transientKey: {}", isTransientProperty, transientKey);
+		}
+		if (isFieldProperty) {
+			log.debug("isFieldProperty: {}, mappingName: {}", isTransientProperty, mappingName);
 		}
 	}
 	
@@ -94,6 +99,10 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 			Field field = AnnotatedElementUtils.findMergedAnnotation(property.getField().get(), Field.class);
 			
 			isFieldProperty = field != null;
+			
+			if (isFieldProperty) {
+				mappingName = StringUtils.defaultIfBlank(field.mapping(), getFieldName());
+			}
 			
 			if (isFieldProperty && field.transientField()) {
 				isTransientProperty = true;
@@ -148,6 +157,6 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 
 	@Override
 	public String getMappingName() {
-		return null;
+		return mappingName;
 	}
 }
