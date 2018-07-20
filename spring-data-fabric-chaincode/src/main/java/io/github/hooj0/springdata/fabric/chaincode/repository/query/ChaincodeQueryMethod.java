@@ -29,6 +29,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Upgrade;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
@@ -45,10 +46,12 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 @SuppressWarnings("rawtypes")
 public class ChaincodeQueryMethod extends QueryMethod {
 
-	private MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
+	private final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 	private @Nullable ChaincodeEntityMetadata<?> metadata;
 	private final Method method;
+	private final Criteria globalCriteria;
 	
+	private final ProposalType proposalType;
 	private final Proposal proposalAnnotated;
 	private final Deploy deployAnnotated;
 	
@@ -56,15 +59,18 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	private ClassToInstanceMap<Annotation> annotationInstatnces = MutableClassToInstanceMap.<Annotation>create();
 	
 	@SuppressWarnings("unchecked")
-	public ChaincodeQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext) {
+	public ChaincodeQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext, Criteria globalCriteria) {
 		super(method, metadata, factory);
 		
 		this.method = method;
 		this.mappingContext = mappingContext;
-		
+		this.globalCriteria = globalCriteria;
 		this.proposalAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Proposal.class);
-		this.deployAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Deploy.class);
+
+		verify(method, metadata);
 		
+		this.proposalType = (ProposalType) AnnotationUtils.getValue(proposalAnnotated, "type");
+		this.deployAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Deploy.class);
 		for (Class clazz : annotationes) {
 			Annotation annotation = AnnotationUtils.findAnnotation(method, clazz);
 			
@@ -78,9 +84,8 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		System.out.println("Proposal: " + proposalAnnotated);
 		System.out.println("Deploy: " + deployAnnotated);
 		System.out.println("annotationInstatnces: " + annotationInstatnces);
+		System.out.println("globalCriteria: " + globalCriteria);
 		System.out.println("--------------------------------------------------");
-		
-		verify(method, metadata);
 	}
 
 	public Proposal getProposalAnnotated() {
@@ -96,7 +101,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public ProposalType getAnnotatedProposalType() {
-		return (ProposalType) AnnotationUtils.getValue(proposalAnnotated, "type");
+		return this.proposalType;
 	}
 	
 	public Invoke getInvokeAnnotated() {
@@ -104,7 +109,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasInvokeAnnotated() {
-		return getInvokeAnnotated() != null || getAnnotatedProposalType() == ProposalType.INVOKE;
+		return getInvokeAnnotated() != null || proposalType == ProposalType.INVOKE;
 	}
 	
 	public Query getQueryAnnotated() {
@@ -112,7 +117,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasQueryAnnotated() {
-		return getQueryAnnotated() != null;
+		return proposalType == ProposalType.QUERY || getQueryAnnotated() != null;
 	}
 	
 	public Deploy getDeployAnnotated() {
@@ -120,6 +125,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasDeployAnnotated() {
+		
 		return getDeployAnnotated() != null;
 	}
 	
@@ -128,7 +134,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasInstallAnnotated() {
-		return getInstallAnnotated() != null;
+		return proposalType == ProposalType.INSTALL || getInstallAnnotated() != null;
 	}
 	
 	public Instantiate getInstantiateAnnotated() {
@@ -136,7 +142,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasInstantiateAnnotated() {
-		return getInstantiateAnnotated() != null;
+		return proposalType == ProposalType.INSTANTIATE || getInstantiateAnnotated() != null;
 	}
 	
 	public Upgrade getUpgradeAnnotated() {
@@ -144,7 +150,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasUpgradeAnnotated() {
-		return getUpgradeAnnotated() != null;
+		return proposalType == ProposalType.UPGRADE || getUpgradeAnnotated() != null;
 	}
 	
 	public Channel getChannelAnnotated() {
@@ -167,10 +173,16 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	
 	@SuppressWarnings({ "unchecked" })
 	private <T> T getAnnotation(Class<T> annotationClass) {
+		
 		if (annotationInstatnces.containsKey(annotationClass)) {
 			return (T) annotationInstatnces.get(annotationClass);
 		}
+		
 		return null;
+	}
+	
+	public Criteria getGlobalCriteria() {
+		return globalCriteria;
 	}
 	
 	@Override
