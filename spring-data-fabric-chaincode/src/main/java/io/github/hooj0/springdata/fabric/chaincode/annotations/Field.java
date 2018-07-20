@@ -24,6 +24,9 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Field {
 
+	/** 映射到 Chaincode的字段名 */
+	String mapping() default "";
+	
 	/** 是否为 TransientMap 属性 */
 	boolean transientField() default true;
 	
