@@ -8,6 +8,7 @@ import org.springframework.data.mapping.context.MappingContext;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <b>function:</b> Chaincode Operations Template
@@ -20,6 +21,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincode
  * @email hoojo_@126.com
  * @version 1.0
  */
+@Slf4j
 public class ChaincodeTemplate implements ChaincodeOperations, ApplicationContextAware {
 
 	private ApplicationContext applicationContext;
