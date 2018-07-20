@@ -44,7 +44,7 @@ public class ChaincodeRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> 
 		this.operations = operations;
 		setMappingContext(operations.getConverter().getMappingContext());
 	}
-
+	
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();

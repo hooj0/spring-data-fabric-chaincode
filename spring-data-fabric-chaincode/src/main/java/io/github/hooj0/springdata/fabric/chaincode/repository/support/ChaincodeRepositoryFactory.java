@@ -3,10 +3,8 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -21,10 +19,7 @@ import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
 
-import com.google.common.collect.Maps;
-
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
@@ -50,28 +45,17 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 
 	private static final SpelExpressionParser EXPRESSION_PARSER = new SpelExpressionParser();
 	
-	private Map<String, Object> chaincodeInformation = Maps.newConcurrentMap();
-	
 	private final ChaincodeEntityInformationCreator entityInformationCreator;
 	private final ChaincodeOperations operations;
 	
 	public ChaincodeRepositoryFactory(Class<?> repositoryInterface, ChaincodeOperations operations) {
+		log.debug("Creating chaincode bean factory.");
+		
 		Assert.notNull(operations, "ChaincodeOperations must not be null!");
 		Assert.notNull(repositoryInterface, "repositoryInterface must not be null!");
 		
 		this.operations = operations;
-		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
-
-		log.debug("Creating chaincode bean factory");
-		
-		Channel channel = AnnotationUtils.findAnnotation(repositoryInterface, Channel.class);
-		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
-		
-		chaincodeInformation.put("channel", channel.name());
-		chaincodeInformation.put("chaincodeName", chaincode.name());
-		chaincodeInformation.put("chaincodePath", chaincode.path());
-		chaincodeInformation.put("chaincodePath", chaincode.type());
-		chaincodeInformation.put("chaincodeVersion", chaincode.version());
+		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(repositoryInterface, this.operations.getConverter().getMappingContext());
 	}
 	
 	@Override
@@ -93,7 +77,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
 		if (isQueryDslRepository(metadata.getRepositoryInterface())) {
-			throw new IllegalArgumentException("QueryDsl Support has not been implemented yet.");
+			throw new ChaincodeUnsupportedOperationException("QueryDsl Support has not been implemented yet.");
 		}
 
 		log.debug("IdType: {}", metadata.getIdType());
@@ -103,7 +87,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 			return SimpleChaincodeRepository.class;
 		} 
 		
-		throw new IllegalArgumentException("Unknow Support has not been implemented yet.");
+		throw new ChaincodeUnsupportedOperationException("Unknow Support has not been implemented yet.");
 	}
 	
 	@Override

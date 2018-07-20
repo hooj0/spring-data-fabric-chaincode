@@ -1,5 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
+import io.github.hooj0.springdata.fabric.chaincode.repository.information.RepositoryAannotaitonInformation;
+
 /**
  * ChaincodeEntityInformation 对象创造者接口
  * @author hoojo
@@ -14,4 +16,6 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 public interface ChaincodeEntityInformationCreator {
 
 	<T, ID> ChaincodeEntityInformation<T, ID> getEntityInformation(Class<T> domainClass);
+	
+	RepositoryAannotaitonInformation getRepositoryAannotaitonInformation();
 }

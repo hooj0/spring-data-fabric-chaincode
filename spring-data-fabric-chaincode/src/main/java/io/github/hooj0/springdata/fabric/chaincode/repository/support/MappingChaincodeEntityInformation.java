@@ -5,6 +5,7 @@ import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
+import io.github.hooj0.springdata.fabric.chaincode.repository.information.RepositoryAannotaitonInformation;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,33 +26,33 @@ public class MappingChaincodeEntityInformation<T, ID> extends PersistentEntityIn
 	private final ChaincodePersistentEntity<T> entityMetadata;
 	private final ChaincodeConverter converter;
 	
-	private String entityName;
+	private RepositoryAannotaitonInformation repositoryAannotaitonInformation;
 	
 	public MappingChaincodeEntityInformation(ChaincodePersistentEntity<T> entity, ChaincodeConverter converter) {
-		this(entity.getName(), entity, converter);
-	}
-	
-	public MappingChaincodeEntityInformation(String entityName, ChaincodePersistentEntity<T> entity, ChaincodeConverter converter) {
 		super(entity);
 		
-		Assert.notNull(entityName, "entityName must not be null!");
-		Assert.notNull(converter, "converter must not be null!");
+		Assert.notNull(converter, "ChaincodeConverter must not be null!");
+		Assert.notNull(entity, "ChaincodePersistentEntity must not be null!");
 
 		this.entityMetadata = entity;
-		this.entityName = entityName;
 		this.converter = converter;
 	}
 	
 	public void out() {
 		log.debug("entityMetadata name: {}", entityMetadata.getName());
-		log.debug("entityName: {}", entityName);
+		log.debug("repositoryAannotaitonInformation: {}", repositoryAannotaitonInformation);
 		log.debug("entityMetadata: {}", entityMetadata);
 		log.debug("converter: {}", converter);
 	}
 
-	// XXX
-	public String getChaincodeName() {
-		
-		return null;
+	@Override
+	public RepositoryAannotaitonInformation getRepositoryAannotaitonInformation() {
+		return repositoryAannotaitonInformation;
+	}
+
+	public void setRepositoryAannotaitonInformation(RepositoryAannotaitonInformation repositoryAannotaitonInformation) {
+		Assert.notNull(repositoryAannotaitonInformation, "RepositoryAannotaitonInformation must not be null!");
+
+		this.repositoryAannotaitonInformation = repositoryAannotaitonInformation;
 	}
 }

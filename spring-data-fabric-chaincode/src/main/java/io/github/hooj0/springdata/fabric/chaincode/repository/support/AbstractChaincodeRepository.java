@@ -5,7 +5,9 @@ import java.lang.reflect.Type;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
+import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * ChaincodeRepository Base abstract repository
@@ -19,7 +21,8 @@ import lombok.NoArgsConstructor;
  * @version 1.0
  */
 @NoArgsConstructor
-public abstract class AbstractChaincodeRepository<T> implements ChaincodeRepository<T> {
+@Slf4j
+public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>/*, DeployChaincodeRepository<T>*/ {
 
 	protected ChaincodeEntityInformation<T, ?> entityInformation;
 	protected ChaincodeOperations operations;
@@ -31,8 +34,24 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	}
 	
 	public AbstractChaincodeRepository(ChaincodeEntityInformation<T, ?> entityInformation, ChaincodeOperations operations) {
+		log.debug("RepositoryAannotaitonInformation: {}", entityInformation.getRepositoryAannotaitonInformation());
+
 		this.entityInformation = entityInformation;
 		this.operations = operations;
+	}
+	
+	@Override
+	public String invoke(String func, String... args) {
+		log.debug("execution chaincode repository invoke -> func: {}, args: {}", func, args);
+		
+		return "success";
+	}
+
+	@Override
+	public String query(String func, String... args) {
+		log.debug("execution chaincode repository invoke -> func: {}, args: {}", func, args);
+		
+		return "success";
 	}
 	
 	@Override

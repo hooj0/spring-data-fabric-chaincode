@@ -13,15 +13,10 @@ import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
  * @email hoojo_@126.com
  * @version 1.0
  */
-public abstract class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T> {
+public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T> {
 
-	private Class<?> entityType;
-	
 	public SimpleChaincodeRepository(ChaincodeEntityInformation<T, ?> metadata, ChaincodeOperations operations) {
 		super(metadata, operations);
-		
-		this.entityType = this.entityInformation.getJavaType();
-		// metadata.getChaincodeName();
 	}
 
 	public SimpleChaincodeRepository(ChaincodeOperations operations) {
