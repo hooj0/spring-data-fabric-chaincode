@@ -77,7 +77,7 @@ public class AnnotationedRepositoryTests {
 	@Autowired @Qualifier("goRepo")
 	private GoRepo goRepo;
 	
-	//@Autowired @Qualifier("myRepo")
+	@Autowired @Qualifier("goRepo")
 	private MyRepo myRepo;
 	
 	@Autowired ChaincodeTemplate template;
@@ -124,7 +124,6 @@ public class AnnotationedRepositoryTests {
 	
 	@Channel(name = "channel_0.1")
 	@Chaincode(name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
-	@Repository("myRepo")
 	interface MyRepo extends ChaincodeRepository<Person> {
 	}
 	
