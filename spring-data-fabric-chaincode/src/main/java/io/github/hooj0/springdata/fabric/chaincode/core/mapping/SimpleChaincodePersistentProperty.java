@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.model.AnnotationBasedPersistentProperty;
@@ -52,18 +53,26 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	
 	public SimpleChaincodePersistentProperty(Property property, PersistentEntity<?, ChaincodePersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
 		super(property, owner, simpleTypeHolder);
-		log.debug("Added property: {}, filed: {}", property.getName(), property.getField());
+		log.debug("Added property: {}, filed: {}", property.getName(), property.getField().get());
 		
+		// isAnnotatedTransient(property);
+		isAnnotationTransient(property);
+		
+		if (isTransientProperty) {
+			log.debug("isTransientProperty: {}, transientKey: {}", isTransientProperty, transientKey);
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void isAnnotatedTransient(Property property) {
 		if (isAnnotationPresent(Field.class)) {
 			Field field = findAnnotation(Field.class);
 			
-			if (field != null) {
-				isFieldProperty = true;
-			}
+			isFieldProperty = field != null;
 			
 			if (isFieldProperty && field.transientField()) {
 				isTransientProperty = true;
-				transientKey = StringUtils.defaultString(field.transientAlias(), getFieldName());
+				transientKey = StringUtils.defaultIfBlank(field.transientAlias(), getFieldName());
 			} else {
 				isTransientProperty = false;
 			}
@@ -72,27 +81,27 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 			Transient transientField = findAnnotation(Transient.class);
 			if (transientField != null) {
 				isTransientProperty = true;
-				transientKey = StringUtils.defaultString(transientField.alias(), getFieldName());
+				transientKey = StringUtils.defaultIfBlank(transientField.alias(), getFieldName());
 			} else {
 				isTransientProperty = false;
 			}
 		}
-		
-		/*
-		Field field = AnnotatedElementUtils.findMergedAnnotation(property.getType(), Field.class);
-		if (field != null) {
-			isFieldProperty = true;
+	}
+	
+	private void isAnnotationTransient(Property property) {
+		if (isAnnotationPresent(Field.class) || isAnnotationPresent(Transient.class)) {
+			
+			Field field = AnnotatedElementUtils.findMergedAnnotation(property.getField().get(), Field.class);
+			
+			isFieldProperty = field != null;
+			
+			if (isFieldProperty && field.transientField()) {
+				isTransientProperty = true;
+				transientKey = StringUtils.defaultIfBlank(field.transientAlias(), getFieldName());
+			} else {
+				isTransientProperty = false;
+			}
 		}
-		
-		if (isFieldProperty && field.transientField()) {
-			isTransientProperty = true;
-			transientKey = field.transientAlias();
-		} else {
-			isTransientProperty = false;
-		}
-		*/
-		
-		log.debug("isTransientProperty: {}, transientKey: {}", isTransientProperty, transientKey);
 	}
 	
 	@Override
@@ -135,5 +144,10 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	@Override
 	public boolean isFieldProperty() {
 		return isFieldProperty;
+	}
+
+	@Override
+	public String getMappingName() {
+		return null;
 	}
 }

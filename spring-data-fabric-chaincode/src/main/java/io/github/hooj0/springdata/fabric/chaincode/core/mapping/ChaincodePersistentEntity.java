@@ -17,7 +17,9 @@ import org.springframework.data.mapping.PersistentEntity;
  */
 public interface ChaincodePersistentEntity<T> extends PersistentEntity<T, ChaincodePersistentProperty> {
 
-	Map<String, byte[]> transientData();
+	Map<String, ChaincodePersistentProperty> getTransientProperties();
 	
-	public ChaincodePersistentProperty getTransientProperty();
+	Map<String, String> getTransientMappings();
+	
+	Map<String, String> getFieldMappings();
 }

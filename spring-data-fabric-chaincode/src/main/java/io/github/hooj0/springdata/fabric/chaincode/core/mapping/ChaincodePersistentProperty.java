@@ -29,6 +29,8 @@ public interface ChaincodePersistentProperty extends PersistentProperty<Chaincod
 	
 	String getTransientKey();
 	
+	String getMappingName();
+	
 	/**
 	 * 通过从属性类型派生的{@code annotationType}查找{@link AnnotatedType}。 
 	 * 内省属性字段/访问器可以查找带注释的类型。 

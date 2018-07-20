@@ -15,8 +15,6 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import com.google.common.collect.Maps;
-
 import io.github.hooj0.springdata.fabric.chaincode.ChaincodeMappingException;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
@@ -39,12 +37,10 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 	private final StandardEvaluationContext context;
 	private final SpelExpressionParser parser;
 	
-	private ChaincodePersistentProperty transientProperty;
-	private Map<String, byte[]> transientData = Maps.newHashMap();
-	
 	public SimpleChaincodePersistentEntity(TypeInformation<T> information) {
 		super(information);
-		log.debug("Add Chaincode Persistent Entity: {}, Type: {}", information.getClass(), information.getType());
+		
+		log.debug("Add Chaincode Persistent Entity: {}", information.getType());
 		
 		this.context = new StandardEvaluationContext();
 		this.parser = new SpelExpressionParser();
@@ -55,7 +51,7 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 			Entity entity = clazz.getAnnotation(Entity.class);
 			log.debug("@Entity: {}", entity);
 		} else {
-			throw new ChaincodeMappingException("No added @Entity annotation!");
+			throw new ChaincodeMappingException(clazz.getSimpleName() + " -> No added @Entity annotation!");
 		}
 	}
 	
@@ -64,9 +60,7 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 		super.addPersistentProperty(property);
 		
 		if (property.isTransientProperty()) {
-			this.transientProperty = property;
 			
-			transientData.put(property.getTransientKey(), null);
 		}
 	}
 
@@ -77,16 +71,6 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 		context.setRootObject(applicationContext);
 	}
 	
-	@Override
-	public Map<String, byte[]> transientData() {
-		return transientData;
-	}
-
-	@Override
-	public ChaincodePersistentProperty getTransientProperty() {
-		return transientProperty;
-	}
-
 	/**
 	 * 解析表达式信息
 	 * @author hoojo
@@ -111,8 +95,6 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 	
 	/**
 	 * Handler to inspect {@link ChaincodePersistentProperty} instances and check usage of {@link Transient}.
-	 * @author Christoph Strobl
-	 * @since 1.5
 	 */
 	private enum TransientFieldMappingHandler implements PropertyHandler<ChaincodePersistentProperty> {
 		INSTANCE;
@@ -128,5 +110,20 @@ public class SimpleChaincodePersistentEntity<T> extends BasicPersistentEntity<T,
 				}
 			}
 		}
+	}
+
+	@Override
+	public Map<String, ChaincodePersistentProperty> getTransientProperties() {
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getTransientMappings() {
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getFieldMappings() {
+		return null;
 	}
 }
