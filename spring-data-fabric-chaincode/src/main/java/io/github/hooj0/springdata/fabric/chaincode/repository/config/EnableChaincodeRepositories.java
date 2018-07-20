@@ -75,7 +75,7 @@ public @interface EnableChaincodeRepositories {
 
 	/**
 	 * Configures the location of where to find the Spring Data named queries properties file. Will default to
-	 * {@code META-INF/template-named-queries.properties}.
+	 * {@code META-INF/chaincode-named-queries.properties}.
 	 */
 	String namedQueriesLocation() default "";
 
