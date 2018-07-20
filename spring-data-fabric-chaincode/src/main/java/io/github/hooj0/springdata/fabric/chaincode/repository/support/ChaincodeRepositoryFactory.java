@@ -5,6 +5,9 @@ import static org.springframework.data.querydsl.QuerydslUtils.QUERY_DSL_PRESENT;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -20,9 +23,13 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
 
 import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria.CriteriaBuilder;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.PartTreeChaincodeQuery;
@@ -47,6 +54,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	
 	private final ChaincodeEntityInformationCreator entityInformationCreator;
 	private final ChaincodeOperations operations;
+	private final Criteria globalCriteria;
 	
 	public ChaincodeRepositoryFactory(Class<?> repositoryInterface, ChaincodeOperations operations) {
 		log.debug("Creating chaincode bean factory.");
@@ -55,7 +63,32 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		Assert.notNull(repositoryInterface, "repositoryInterface must not be null!");
 		
 		this.operations = operations;
-		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(repositoryInterface, this.operations.getConverter().getMappingContext());
+		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
+		
+		this.globalCriteria = bindCriteria(repositoryInterface);
+		
+		System.err.println(globalCriteria);
+	}
+	
+	private Criteria bindCriteria(Class<?> repositoryInterface) {
+		CriteriaBuilder builder = CriteriaBuilder.newBuilder();
+		
+		Channel channel = AnnotatedElementUtils.findMergedAnnotation(repositoryInterface, Channel.class);
+		if (channel != null) {
+			builder.channel(channel.name()).orgs(channel.orgs());
+		}
+
+		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
+		if (chaincode != null) {
+			if (chaincode.orgs().length != 0) {
+				builder.orgs(chaincode.orgs());
+			} 
+
+			builder.channel(StringUtils.defaultIfBlank(chaincode.channel(), channel.name()));
+			builder.name(chaincode.name()).path(chaincode.path()).type(chaincode.type()).version(chaincode.version());
+		}
+		
+		return builder.build();
 	}
 	
 	@Override
@@ -63,10 +96,13 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		return entityInformationCreator.getEntityInformation(domainClass);
 	}
 
+	/**
+	 * 创建 {@link SimpleChaincodeRepository } 对象，
+	 * 传入构造参数  {@link #globalCriteria}, {@link #getEntityInformation(Class)} , {@link #operations}
+	 */
 	@Override
 	protected Object getTargetRepository(RepositoryInformation metadata) {
-		// XXX new SimpleChaincodeRepository<T>();
-		return getTargetRepositoryViaReflection(metadata, getEntityInformation(metadata.getDomainType()), operations);
+		return getTargetRepositoryViaReflection(metadata, globalCriteria, getEntityInformation(metadata.getDomainType()), operations);
 	}
 
 	/**
@@ -110,10 +146,10 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(Key key, QueryMethodEvaluationContextProvider evaluationContextProvider) {
-		// 可以根据配置不同的key 适配不同的 EnableChaincodeRepositories.queryLookupStrategy()
 		log.debug("key: {}", key);
 		
-		return Optional.of(new ChaincodeQueryLookupStrategy(operations, evaluationContextProvider, operations.getConverter().getMappingContext()));
+		// 可以根据配置不同的key 适配不同的 EnableChaincodeRepositories.queryLookupStrategy()
+		return Optional.of(new ChaincodeQueryLookupStrategy(operations, evaluationContextProvider, operations.getConverter().getMappingContext(), globalCriteria));
 	}
 
 	/**
@@ -121,20 +157,22 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	 */
 	private class ChaincodeQueryLookupStrategy implements QueryLookupStrategy {
 
+		private final Criteria globalCriteria;
 		private final ChaincodeOperations operations;
 		private final QueryMethodEvaluationContextProvider evaluationContextProvider;
 		private final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 		
-		ChaincodeQueryLookupStrategy(ChaincodeOperations operations, QueryMethodEvaluationContextProvider evaluationContextProvider, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext) {
+		ChaincodeQueryLookupStrategy(ChaincodeOperations operations, QueryMethodEvaluationContextProvider evaluationContextProvider, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext, Criteria globalCriteria) {
 			this.operations = operations;
 			this.evaluationContextProvider = evaluationContextProvider;
 			this.mappingContext = mappingContext;
+			this.globalCriteria = globalCriteria;
 		}
 
 		@Override
 		public RepositoryQuery resolveQuery(Method method, RepositoryMetadata metadata, ProjectionFactory factory, NamedQueries namedQueries) {
 
-			ChaincodeQueryMethod queryMethod = new ChaincodeQueryMethod(method, metadata, factory, mappingContext);
+			ChaincodeQueryMethod queryMethod = new ChaincodeQueryMethod(method, metadata, factory, mappingContext, globalCriteria);
 			String namedQueryName = queryMethod.getNamedQueryName();
 
 			log.debug("queryMethod.getName: {}", queryMethod.getName());
