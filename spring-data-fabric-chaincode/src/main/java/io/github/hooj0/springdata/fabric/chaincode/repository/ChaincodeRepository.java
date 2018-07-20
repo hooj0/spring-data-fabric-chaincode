@@ -1,9 +1,5 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository;
 
-import java.io.File;
-import java.io.InputStream;
-
-import org.hyperledger.fabric.sdk.ChaincodeEndorsementPolicy;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
@@ -21,18 +17,6 @@ import org.springframework.data.repository.Repository;
 @NoRepositoryBean
 public interface ChaincodeRepository<T> extends Repository<T, Object> {
 
-	public void install(File chaincodeFile);
-	
-	public void install(InputStream chaincodeFile);
-	
-	public void instantiate(String policyFilePath);
-	
-	public void instantiate(File policyFile);
-	
-	public void instantiate(ChaincodeEndorsementPolicy endorsementPolicy);
-	
-	public void upgrade();
-	
 	public String invoke(String func, String... args);
 	
 	public String query(String func, String... args);
