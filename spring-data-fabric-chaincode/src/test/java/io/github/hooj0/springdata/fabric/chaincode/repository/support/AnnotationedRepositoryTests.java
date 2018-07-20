@@ -2,11 +2,44 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
 
 import org.hyperledger.fabric.sdk.TransactionRequest.Type;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.convert.CustomConversions;
+import org.springframework.stereotype.Repository;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.Field;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Proposal;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
+import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
+import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
+import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
+import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
+import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
+import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
+import io.github.hooj0.springdata.fabric.chaincode.repository.config.EnableChaincodeRepositories;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <b>function:</b> AnnotationedRepositoryTests
@@ -19,23 +52,109 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instal
  * @email hoojo_@126.com
  * @version 1.0
  */
+@Slf4j
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration
 public class AnnotationedRepositoryTests {
 
-	@Chaincode(channel = "mychannel", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
-	interface GoRepo {
-		
-		@Install
-		public void installChaincode(String ccPath);
-		
-		@Install
-		public void installChaincode(File ccFile);
+	@Configuration
+	@EnableChaincodeRepositories(basePackageClasses = GoRepo.class,
+		considerNestedRepositories = true, 
+		includeFilters = @Filter(pattern = ".*GoRepo", type = FilterType.REGEX))
+	public static class Config extends AbstractChaincodeConfiguration {
+		/*
+		@Override
+		protected Set<Class<?>> getInitialEntitySet() {
+			return Collections.singleton(Person.class);
+		}
 
-		@Install
-		public void installChaincode(InputStream ccStream);
+		@Bean
+		CaptureEventListener eventListener() {
+			return new CaptureEventListener();
+		}*/
 	}
 	
-	@Chaincode(channel = "mychannel", name = "mycc", type = Type.NODE, version = "1.1")
+	@Autowired @Qualifier("goRepo")
+	private GoRepo goRepo;
+	
+	//@Autowired @Qualifier("myRepo")
+	private MyRepo myRepo;
+	
+	@Autowired ChaincodeTemplate template;
+	@Autowired ChaincodeOperations operations;
+	@Autowired SimpleChaincodeMappingContext context;
+	@Autowired ChaincodeConverter converter;
+	@Autowired CustomConversions conversion;
+	
+	@Test
+	public void testInject() {
+		Assert.assertNotNull("null template", template);
+		Assert.assertNotNull("null operations", operations);
+		Assert.assertNotNull("null context", context);
+		Assert.assertNotNull("null converter", converter);
+		Assert.assertNotNull("null conversion", conversion);
+		
+		Assert.assertNotNull("null goRepo", goRepo);
+		Assert.assertNotNull("null myRepo", myRepo);
+	}
+	
+	@Test
+	public void testInvoke() {
+		System.out.println(myRepo.invoke("move", "2", "3"));
+	}
+	
+	@Test
+	public void testInstallChaincode() {
+		goRepo.installChaincode("src/gochaincode");
+	}
+	
+	@Entity
+	@Data
+	@AllArgsConstructor
+	@RequiredArgsConstructor
+	static class Person {
+		@Id private final int number;
+		
+		@Field(transientAlias = "personName") String name;
+		
+		@Transient(alias = "oldVersion") Long version;
+		
+		@Transient Date date;
+	}
+	
+	@Channel(name = "channel_0.1")
+	@Chaincode(name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
+	@Repository("myRepo")
+	interface MyRepo extends ChaincodeRepository<Person> {
+	}
+	
+	@Chaincode(channel = "mychannel_2", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
+	@Repository("goRepo")
+	interface GoRepo extends MyRepo {
+		
+		@Proposal("select * from a where a = ?0")
+		@Channel(name = "mychannel_123")
+		public void installChaincode(String ccPath);
+		
+		@Query("a,b,c,e")
+		public void installChaincode2(File ccFile);
+
+		@Invoke("xyz")
+		public void installChaincode3(InputStream ccStream);
+	}
+	
+	@Chaincode(channel = "mychannel_3", name = "mycc", type = Type.NODE, version = "1.1")
+	@Repository("nodeRepo")
 	interface NodeRepo extends GoRepo {
 		
+	}
+	
+	static class CaptureEventListener implements ApplicationListener<ApplicationEvent> {
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			Object source = event.getSource();
+			
+			log.debug("event source: {}, timestamp: {}", source, event.getTimestamp());
+		}
 	}
 }
