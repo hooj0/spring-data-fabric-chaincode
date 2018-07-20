@@ -1,11 +1,16 @@
 package io.github.hooj0.springdata.fabric.chaincode.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.convert.CustomConversions;
+import org.springframework.data.mapping.context.MappingContext;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
+import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
+import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeCustomConversions;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 配置需要注入的 Bean 对象
@@ -18,10 +23,15 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeM
  * @email hoojo_@126.com
  * @version 1.0
  */
-public class SimpleChaincodeConfiguration extends AbstractChaincodeConfiguration {
+@Slf4j
+@Deprecated
+@SuppressWarnings("all")
+public final class SimpleChaincodeConfiguration extends AbstractChaincodeConfiguration {
 
 	@Bean
-	public SimpleChaincodeMappingContext mappingContext() throws ClassNotFoundException {
+	public MappingContext mappingContext() throws ClassNotFoundException {
+		log.debug("create chaincode configuration \"MappingContext\" instance");
+		
 		SimpleChaincodeMappingContext mappingContext = new SimpleChaincodeMappingContext();
 		mappingContext.setInitialEntitySet(getInitialEntitySet());
 
@@ -29,21 +39,24 @@ public class SimpleChaincodeConfiguration extends AbstractChaincodeConfiguration
 	}
 	
 	@Bean
-	public MappingChaincodeConverter mappingConverter() throws ClassNotFoundException {
+	public ChaincodeConverter mappingConverter() throws ClassNotFoundException {
+		log.debug("create chaincode configuration \"ChaincodeConverter\" instance");
 		
 		MappingChaincodeConverter converter = new MappingChaincodeConverter(mappingContext());
 		return converter;
 	}
 	
 	@Bean
-	public ChaincodeTemplate chaincodeTemplate() {
-		return new ChaincodeTemplate();
+	public CustomConversions customConversions() throws ClassNotFoundException {
+		log.debug("create chaincode configuration \"CustomConversions\" instance");
+		
+		return new ChaincodeCustomConversions();
 	}
 	
 	@Bean
 	public ChaincodeOperations chaincodeOperations() throws ClassNotFoundException {
+		log.debug("create chaincode configuration \"ChaincodeOperations\" instance");
 		
-		return null;
-		//return this.chaincodeTemplate();
+		return new ChaincodeTemplate(this.mappingConverter());
 	}
 }
