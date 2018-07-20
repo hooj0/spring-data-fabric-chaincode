@@ -35,8 +35,8 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 
 	public StringBasedChaincodeQuery(String namedQuery, ChaincodeQueryMethod queryMethod, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
 		super(queryMethod, operations);
-		log.debug("namedQuery: {}", namedQuery);
-
+		
+		this.query = namedQuery;
 		//this.stringBasedQuery = new StringBasedQuery(namedQuery, new ExpressionEvaluatingParameterBinder(expressionParser, evaluationContextProvider));
 		if (!queryMethod.hasDeployAnnotated()) {
 			
@@ -44,8 +44,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		}
 	}
 
-	@Override
-	public Object execute(Object[] parameterValues) {
+	public Object execute2(Object[] parameterValues) {
 		
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
 		log.info("execute accessor: {}", accessor);

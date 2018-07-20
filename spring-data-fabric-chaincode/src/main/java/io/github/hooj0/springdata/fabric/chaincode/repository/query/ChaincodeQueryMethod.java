@@ -1,5 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
@@ -14,8 +15,14 @@ import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.MutableClassToInstanceMap;
+
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Deploy;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instantiate;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Proposal;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
@@ -35,55 +42,73 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
  * @email hoojo_@126.com
  * @version 1.0
  */
+@SuppressWarnings("rawtypes")
 public class ChaincodeQueryMethod extends QueryMethod {
 
 	private MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 	private @Nullable ChaincodeEntityMetadata<?> metadata;
 	private final Method method;
-	private Proposal proposal;
 	
+	private final Proposal proposalAnnotated;
+	private final Deploy deployAnnotated;
+	
+	private Class[] annotationes = { Install.class, Instantiate.class, Upgrade.class, Invoke.class, Query.class, Channel.class };
+	private ClassToInstanceMap<Annotation> annotationInstatnces = MutableClassToInstanceMap.<Annotation>create();
+	
+	@SuppressWarnings("unchecked")
 	public ChaincodeQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext) {
 		super(method, metadata, factory);
-		
-		verify(method, metadata);
 		
 		this.method = method;
 		this.mappingContext = mappingContext;
 		
-		this.proposal = AnnotatedElementUtils.findMergedAnnotation(method, Proposal.class);
+		this.proposalAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Proposal.class);
+		this.deployAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Deploy.class);
+		
+		for (Class clazz : annotationes) {
+			Annotation annotation = AnnotationUtils.findAnnotation(method, clazz);
+			
+			if (annotation != null) {
+				annotationInstatnces.put(clazz, annotation);
+			}
+		}
 		
 		System.out.println("--------------------------------------------------");
 		System.out.println("method: " + method.getName());
-		System.out.println("query: " + proposal);
+		System.out.println("Proposal: " + proposalAnnotated);
+		System.out.println("Deploy: " + deployAnnotated);
+		System.out.println("annotationInstatnces: " + annotationInstatnces);
 		System.out.println("--------------------------------------------------");
+		
+		verify(method, metadata);
 	}
 
 	public Proposal getProposalAnnotated() {
-		return this.proposal;
+		return this.proposalAnnotated;
 	}
 	
 	public boolean hasProposalAnnotated() {
-		return this.proposal != null;
+		return this.proposalAnnotated != null;
 	}
 	
 	public String getAnnotatedProposal() {
-		return (String) AnnotationUtils.getValue(proposal, "value");
+		return (String) AnnotationUtils.getValue(proposalAnnotated, "value");
 	}
 	
 	public ProposalType getAnnotatedProposalType() {
-		return (ProposalType) AnnotationUtils.getValue(proposal, "type");
+		return (ProposalType) AnnotationUtils.getValue(proposalAnnotated, "type");
 	}
 	
 	public Invoke getInvokeAnnotated() {
-		return null;
+		return this.getAnnotation(Invoke.class);
 	}
 	
 	public boolean hasInvokeAnnotated() {
-		return getInvokeAnnotated() != null;
+		return getInvokeAnnotated() != null || getAnnotatedProposalType() == ProposalType.INVOKE;
 	}
 	
 	public Query getQueryAnnotated() {
-		return null;
+		return this.getAnnotation(Query.class);
 	}
 	
 	public boolean hasQueryAnnotated() {
@@ -91,7 +116,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public Deploy getDeployAnnotated() {
-		return null;
+		return this.deployAnnotated;
 	}
 	
 	public boolean hasDeployAnnotated() {
@@ -99,15 +124,15 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public Install getInstallAnnotated() {
-		return null;
+		return this.getAnnotation(Install.class);
 	}
 	
 	public boolean hasInstallAnnotated() {
 		return getInstallAnnotated() != null;
 	}
 	
-	public Install getInstantiateAnnotated() {
-		return null;
+	public Instantiate getInstantiateAnnotated() {
+		return this.getAnnotation(Instantiate.class);
 	}
 	
 	public boolean hasInstantiateAnnotated() {
@@ -115,11 +140,19 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public Upgrade getUpgradeAnnotated() {
-		return null;
+		return this.getAnnotation(Upgrade.class);
 	}
 	
 	public boolean hasUpgradeAnnotated() {
 		return getUpgradeAnnotated() != null;
+	}
+	
+	public Channel getChannelAnnotated() {
+		return this.getAnnotation(Channel.class);
+	}
+	
+	public boolean hasChannelAnnotated() {
+		return getChannelAnnotated() != null;
 	}
 
 	public TypeInformation<?> getReturnType() {
@@ -130,6 +163,14 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		TypeInformation<?> actualType = getReturnType().getActualType();
 
 		return actualType.getType();
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	private <T> T getAnnotation(Class<T> annotationClass) {
+		if (annotationInstatnces.containsKey(annotationClass)) {
+			return (T) annotationInstatnces.get(annotationClass);
+		}
+		return null;
 	}
 	
 	@Override
@@ -162,12 +203,15 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 
 	public String getRequiredAnnotatedQuery() {
-		return Optional.of(this.proposal).map(Proposal::value).orElseThrow(() -> new IllegalStateException("Chaincode Repository method " + this + " has no annotated Proposal"));
+		return Optional.of(this.proposalAnnotated).map(Proposal::value).orElseThrow(() -> new IllegalStateException("Chaincode Repository method " + this + " has no annotated Proposal"));
 	}
 	
 	public void verify(Method method, RepositoryMetadata metadata) {
 		if (isPageQuery()) {
-			throw new RuntimeException("Page queries are not supported. Use a Slice query.");
+			throw new ChaincodeUnsupportedOperationException("Page queries are not supported. Use a Slice query.");
+		}
+		if (!this.hasProposalAnnotated()) {
+			throw new ChaincodeUnsupportedOperationException("Repository " + method.getName() + " are not supported.");
 		}
 	}
 }

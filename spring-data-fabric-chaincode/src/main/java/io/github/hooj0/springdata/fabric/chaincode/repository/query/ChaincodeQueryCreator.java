@@ -18,7 +18,7 @@ import org.springframework.data.repository.query.parser.PartTree;
 
 import com.google.common.collect.Lists;
 
-import io.github.hooj0.springdata.fabric.chaincode.UnsupportedOperationException;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +69,7 @@ public class ChaincodeQueryCreator extends AbstractQueryCreator<List<String>, Li
 	@Override
 	protected List<String> or(List<String> base, List<String> query) {
 		
-		throw new UnsupportedOperationException("Chaincode does not support an OR operator");
+		throw new ChaincodeUnsupportedOperationException("Chaincode does not support an OR operator");
 	}
 
 	@Override

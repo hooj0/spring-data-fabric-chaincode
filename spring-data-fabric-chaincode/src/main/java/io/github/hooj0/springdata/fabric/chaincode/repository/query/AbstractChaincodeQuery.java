@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.ResultProcessor;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.DateTimeConverters;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria.CriteriaBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 
 	protected final GenericConversionService conversionService = new GenericConversionService();
-	protected ChaincodeQueryMethod method;
-	protected ChaincodeOperations operations;
+	protected final ChaincodeOperations operations;
+	protected final ChaincodeQueryMethod method;
 
 	{
 		if (!conversionService.canConvert(java.util.Date.class, String.class)) {
@@ -61,16 +62,21 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 			log.debug("chaincode deploy request: {}, args: {}", method.getName(), parameterValues);
 		} 
 		
+		System.err.println(method.getChannelAnnotated());
+		
 		if (method.hasInstallAnnotated()) {
-			System.err.println("install");
+			System.err.println("install: " + method.getChannelAnnotated());
+			
+			CriteriaBuilder.newBuilder().channel(method.getChannelAnnotated().name()).build();
+			
 		} else if (method.hasInstantiateAnnotated()) {
-			System.err.println("Instantiate");
+			System.err.println("Instantiate: " + method.getChannelAnnotated());
 		} else if (method.hasInstantiateAnnotated()) {
-			System.err.println("Instantiate");
+			System.err.println("Instantiate: " + method.getChannelAnnotated());
 		} else if (method.hasInvokeAnnotated()) {
-			System.err.println("Invoke");
+			System.err.println("Invoke: " + method.getChannelAnnotated());
 		} else if (method.hasQueryAnnotated()) {
-			System.err.println("Query");
+			System.err.println("Query: " + method.getChannelAnnotated());
 		}
 		
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
