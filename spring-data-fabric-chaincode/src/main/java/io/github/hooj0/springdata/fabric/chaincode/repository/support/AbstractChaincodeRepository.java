@@ -58,6 +58,9 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		
 		System.err.println("调用----------->>>AbstractChaincodeRepository");
 		log.debug("globalCriteria: {}", globalCriteria);
+		
+		// setChannelName
+		// setOrgName
 	}
 	
 	@Override
