@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <b>function:</b> 操作合约的通道数据信息
+ * 操作合约的通道数据信息
  * @author hoojo
  * @createDate 2018年7月16日 下午5:17:16
  * @file Channel.java
@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * @version 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
+@Target({ ElementType.TYPE, ElementType.PACKAGE , ElementType.METHOD })
 @Inherited
 @Documented
 public @interface Channel {
@@ -28,5 +28,5 @@ public @interface Channel {
 	String name();
 	
 	/** 智能合约所在 认证组织 */
-	String[] orgs() default {};
+	String org();
 }
