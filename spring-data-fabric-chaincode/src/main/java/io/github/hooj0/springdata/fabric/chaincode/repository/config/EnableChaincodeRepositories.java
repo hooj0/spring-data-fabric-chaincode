@@ -14,7 +14,7 @@ import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
+import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.ChaincodeRepositoryFactoryBean;
 
 /**
