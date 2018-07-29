@@ -5,15 +5,15 @@ import org.springframework.data.convert.CustomConversions;
 import org.springframework.data.mapping.context.MappingContext;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeCustomConversions;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
+import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 配置需要注入的 Bean 对象
+ * simple chaincode configuration injection bean object
  * @author hoojo
  * @createDate 2018年7月18日 下午6:27:13
  * @file SimpleChaincodeConfiguration.java
