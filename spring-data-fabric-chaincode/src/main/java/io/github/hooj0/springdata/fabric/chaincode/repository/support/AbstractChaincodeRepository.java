@@ -4,11 +4,17 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
+import java.util.concurrent.CompletableFuture;
 
+import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
 import org.springframework.util.Assert;
 
 import com.google.common.io.Files;
 
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.InvokeOptions;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.QueryOptions;
+import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
@@ -39,6 +45,8 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 	public AbstractChaincodeRepository(ChaincodeOperations operations) {
 		this.operations = operations;
 		Assert.notNull(operations, "ChaincodeOperations must not be null!");
+		
+		System.err.println("调用----------->>>AbstractChaincodeRepository");
 	}
 	
 	public AbstractChaincodeRepository(Criteria globalCriteria, ChaincodeEntityInformation<T, ?> entityInformation, ChaincodeOperations operations) {
@@ -48,6 +56,7 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		this.entityInformation = entityInformation;
 		this.globalCriteria = globalCriteria;
 		
+		System.err.println("调用----------->>>AbstractChaincodeRepository");
 		log.debug("globalCriteria: {}", globalCriteria);
 	}
 	
@@ -88,7 +97,6 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		return resolveReturnedClassFromGenericType(clazz.getSuperclass());
 	}
 	
-	@Override
 	public String invoke(String func, String... args) {
 		log.debug("execution chaincode repository invoke -> func: {}, args: {}", func, args);
 		
@@ -97,7 +105,6 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		return "success";
 	}
 
-	@Override
 	public String query(String func, String... args) {
 		log.debug("execution chaincode repository query -> func: {}, args: {}", func, args);
 		
@@ -183,5 +190,96 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		
 		System.err.println(this.globalCriteria);
 		return "success";
+	}
+
+	@Override
+	public ResultSet invoke(String func) {
+		
+		operations.invoke(globalCriteria, func);
+		return null;
+	}
+
+	@Override
+	public ResultSet invoke(String func, Object... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet invoke(String func, LinkedHashMap<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func, Object... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String query(String func) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String query(String func, Object... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String query(String func, LinkedHashMap<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet queryFor(String func) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet queryFor(String func, Object... args) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResultSet queryFor(String func, LinkedHashMap<String, Object> args) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
