@@ -31,9 +31,9 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Propos
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
+import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.config.EnableChaincodeRepositories;
 import lombok.AllArgsConstructor;
@@ -42,7 +42,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * <b>function:</b> AnnotationedRepositoryTests
+ * annotationed repository test units
  * @author hoojo
  * @createDate 2018年7月16日 下午6:02:28
  * @file AnnotationedRepository.java
@@ -122,7 +122,7 @@ public class AnnotationedRepositoryTests {
 		@Transient Date date;
 	}
 	
-	@Channel(name = "channel_0.1")
+	@Channel(name = "channel_0.1", org = "org2")
 	@Chaincode(name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
 	interface MyRepo extends ChaincodeRepository<Person> {
 	}
@@ -132,7 +132,7 @@ public class AnnotationedRepositoryTests {
 	interface GoRepo extends MyRepo {
 		
 		@Proposal("select * from a where a = ?0")
-		@Channel(name = "mychannel_123")
+		@Channel(name = "mychannel_123", org = "org1")
 		public void installChaincode(String ccPath);
 		
 		@Query("a,b,c,e")
