@@ -1,10 +1,17 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository;
 
+import java.util.LinkedHashMap;
+import java.util.concurrent.CompletableFuture;
+
+import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
+import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+
+
 /**
- * <b>function:</b> chaincode 智能合约 repo
+ * chaincode 智能合约 repo
  * @author hoojo
  * @createDate 2018年7月17日 上午9:34:18
  * @file ChaincodeRepository.java
@@ -17,9 +24,47 @@ import org.springframework.data.repository.Repository;
 @NoRepositoryBean
 public interface ChaincodeRepository<T> extends Repository<T, Object> {
 
-	public String invoke(String func, String... args);
+	// invoke
+	ResultSet invoke(String func);
+
+	ResultSet invoke(String func, Object... args);
+
+	ResultSet invoke(String func, LinkedHashMap<String, Object> args);
+
+
+	// invoke async
+
+	CompletableFuture<TransactionEvent> invokeAsync(String func);
+
+	CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args);
+
+	CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args);
+
+	// invoke async return event
+
+	TransactionEvent invokeFor(String func);
+
+	TransactionEvent invokeFor(String func, Object... args);
+
+	TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args);
+
 	
-	public String query(String func, String... args);
+	// query
+	String query(String func);
+
+	String query(String func, Object... args);
+
+	String query(String func, LinkedHashMap<String, Object> args);
+
 	
-	public Class<T> getEntityClass();
+	// query async return event
+
+	ResultSet queryFor(String func);
+
+	ResultSet queryFor(String func, Object... args);
+
+	ResultSet queryFor(String func, LinkedHashMap<String, Object> args);
+
+
+	Class<T> getEntityClass();
 }
