@@ -75,13 +75,13 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		
 		Channel channel = AnnotatedElementUtils.findMergedAnnotation(repositoryInterface, Channel.class);
 		if (channel != null) {
-			builder.channel(channel.name()).orgs(channel.orgs());
+			builder.channel(channel.name()).org(channel.org());
 		}
 
 		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
 		if (chaincode != null) {
-			if (chaincode.orgs().length != 0) {
-				builder.orgs(chaincode.orgs());
+			if (StringUtils.isNotBlank(chaincode.org())) {
+				builder.org(chaincode.org());
 			} 
 
 			builder.channel(StringUtils.defaultIfBlank(chaincode.channel(), channel.name()));
