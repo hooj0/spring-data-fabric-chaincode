@@ -128,6 +128,11 @@
 			<scope>test</scope>
 		</dependency>
         
+        <dependency>
+        	<groupId>io.github.hooj0</groupId>
+			<artifactId>fabric-sdk-commons</artifactId>
+			<version>${fabric-sdk-commons.version}</version>
+        </dependency>
 	</dependencies>
 	
 	<build>
