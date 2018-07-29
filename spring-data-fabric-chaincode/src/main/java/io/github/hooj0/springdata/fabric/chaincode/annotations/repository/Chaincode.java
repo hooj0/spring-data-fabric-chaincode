@@ -11,7 +11,7 @@ import org.hyperledger.fabric.sdk.TransactionRequest.Type;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * <b>function:</b> chaincode 智能合约实体注解
+ * chaincode 智能合约实体注解
  * 
  * @author hoojo
  * @createDate 2018年7月16日 下午5:01:01
@@ -26,7 +26,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
 @Documented
-@Channel(name = "")
+@Channel(name = "", org = "")
 public @interface Chaincode {
 
 	/** chaincode 通道名称 */
@@ -34,8 +34,8 @@ public @interface Chaincode {
 	String channel() default "";
 	
 	/** 智能合约所在 认证组织 */
-	@AliasFor(annotation = Channel.class, attribute = "orgs")
-	String[] orgs() default {};
+	@AliasFor(annotation = Channel.class, attribute = "org")
+	String org() default "";
 	
 	/** chaincode 合约名称 */
 	String name();
