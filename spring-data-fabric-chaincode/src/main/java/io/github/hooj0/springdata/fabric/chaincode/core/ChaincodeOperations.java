@@ -1,11 +1,16 @@
 package io.github.hooj0.springdata.fabric.chaincode.core;
 
-import org.hyperledger.fabric.sdk.HFClient;
+import java.util.LinkedHashMap;
 
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
+import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 
 /**
- * <b>function:</b> Chaincode Operations
+ * chaincode operations `install & invoke & instantiate & query & upgrade` interface
+ * 
  * @author hoojo
  * @createDate 2018年7月17日 上午10:28:28
  * @file ChaincodeOperations.java
@@ -15,11 +20,19 @@ import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConvert
  * @email hoojo_@126.com
  * @version 1.0
  */
-public interface ChaincodeOperations {
+public interface ChaincodeOperations/* extends ChaincodeDeployOperations, ChaincodeTransactionOperations */ {
 
-	public HFClient getClient();
+	ChaincodeConverter getConverter();
 	
-	public ChaincodeConverter getConverter();
-	
-	public void install();
+	ChaincodeDeployOperations getChaincodeDeployOperations(Criteria criteria);
+
+	ChaincodeTransactionOperations getChaincodeTransactionOperations(Criteria criteria);
+
+	// invoke
+
+	ResultSet invoke(Criteria criteria, String func);
+
+	ResultSet invoke(Criteria criteria, String func, Object... args);
+
+	ResultSet invoke(Criteria criteria, String func, LinkedHashMap<String, Object> args);
 }
