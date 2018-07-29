@@ -1,7 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
 import java.io.File;
-import java.io.IOError;
 import java.io.InputStream;
 import java.util.Date;
 
@@ -23,7 +22,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
-import io.github.hooj0.springdata.fabric.chaincode.entity.BaseEntity;
+import io.github.hooj0.springdata.fabric.chaincode.domain.AbstractEntity;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.config.EnableChaincodeRepositories;
@@ -61,7 +60,7 @@ public class BasicCRUDRepositoryTests {
 
 	@Test
 	public void testInvoke() {
-		Assert.assertEquals(repo.invoke("move", "a", "b", "c"), "success");
+		Assert.assertEquals(repo.invoke("move", "a", "b", "c").getResult(), "success");
 	}
 	
 	@Test
@@ -96,19 +95,19 @@ public class BasicCRUDRepositoryTests {
 		repo.upgrade(new File("a.json"), "v1.3", "move", "a", "b");
 	}
 	
-	@Chaincode(orgs = { "org1", "org2" }, channel = "mychannel_1", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
+	@Chaincode(org = "org2", channel = "mychannel_1", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
 	interface MyRepository extends ChaincodeRepository<User> {
 	}
 
 	@Chaincode(name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
-	@Channel(name = "channel-2", orgs = {"a", "b"})
+	@Channel(name = "channel-2", org = "a")
 	interface MyRepository2 extends DeployChaincodeRepository<User> {
 	}
 	
 	@Entity
 	@AllArgsConstructor
 	@RequiredArgsConstructor
-	static class User extends BaseEntity {
+	static class User extends AbstractEntity {
 		@Id private final int number;
 		
 		@Field(transientAlias = "personName") String name;
