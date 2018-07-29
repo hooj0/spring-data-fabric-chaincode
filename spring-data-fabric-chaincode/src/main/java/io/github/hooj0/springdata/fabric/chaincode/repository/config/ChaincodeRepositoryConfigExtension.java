@@ -26,10 +26,10 @@ import org.w3c.dom.Element;
 
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeCustomConversions;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
+import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.ChaincodeRepositoryFactory;
