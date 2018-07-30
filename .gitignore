@@ -29,5 +29,6 @@ hs_err_pid*
 *.project
 *.settings
 .settings/*
+*/.settings
 */.settings/*
 
