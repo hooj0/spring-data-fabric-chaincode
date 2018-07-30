@@ -60,7 +60,7 @@ public class AnnotationedRepositoryTests {
 	@Configuration
 	@EnableChaincodeRepositories(basePackageClasses = GoRepo.class,
 		considerNestedRepositories = true, 
-		includeFilters = @Filter(pattern = ".*GoRepo", type = FilterType.REGEX))
+		includeFilters = @Filter(pattern = ".*Repo", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
 		/*
 		@Override
@@ -79,6 +79,10 @@ public class AnnotationedRepositoryTests {
 	
 	@Autowired @Qualifier("goRepo")
 	private MyRepo myRepo;
+	
+	@Autowired
+	@Qualifier("nodeRepo")
+	private NodeRepo nodeRepo;
 	
 	@Autowired ChaincodeTemplate template;
 	@Autowired ChaincodeOperations operations;
@@ -101,6 +105,9 @@ public class AnnotationedRepositoryTests {
 	@Test
 	public void testInvoke() {
 		System.out.println(myRepo.invoke("move", "2", "3"));
+		System.out.println(myRepo.query("2223333"));
+		//goRepo.installChaincode("src/gochaincode");
+		//nodeRepo.installChaincode("src/gochaincode22222");
 	}
 	
 	@Test
