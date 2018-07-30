@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--
+	  <pattern>
+	      %d{yyyy-MM-dd HH:mm:ss} [%level] - %msg%n
+	      Logger: %logger
+	      Class: %class
+	      File: %file
+	      Caller: %caller
+	      Line: %line
+	      Message: %m
+	      Method: %M
+	      Relative: %relative
+	      Thread: %thread
+	      Exception: %ex
+	      xException: %xEx
+	      nopException: %nopex
+	      rException: %rEx
+	      Marker: %marker
+	      newline:%n
+	  </pattern>
+	-->
+  
+	<!-- 
+	https://logback.qos.ch/manual/layouts.html#Coloring
+	通过括号分组允许对子图案进行着色。从版本1.0.5开始，PatternLayout识别
+	%black，%red，%green，%yellow，%blue，%magenta，%cyan，%white，% grey，
+	%boldRed，%boldGreen，%boldYellow，%boldBlue，%boldMagenta， %boldCyan，%boldWhite和%highlight作为转换字。
+	这些转换字旨在包含子模式。由着色字包围的任何子图案将以指定的颜色输出。
+
+	以下是说明着色的配置文件。请注意包含%logger {15}的%cyan转换说明符。
+	这将输出以青色为单位缩写为15个字符的记录器名称。
+	%highlight转换说明符以粗体red显示其级别为ERROR的事件，red为WARN，BLUE为INFO，以及其他级别的默认颜色。
+	
+	windows Jansi 不管用，启用 ANSIconsole，注释掉 
+	https://blog.csdn.net/ShewMi/article/details/78992458
+	
+	at ch.qos.logback.core.util.DynamicClassLoadingException: 
+		Failed to instantiate type org.fusesource.jansi.WindowsAnsiOutputStream
+	https://www.microsoft.com/zh-CN/download/details.aspx?id=5582
+	 -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- 
+		在windows下 Jansi 会抛出异常但能输出颜色转义字符，不能正常输出颜色，
+		启用 ANSIconsole 在windows下可以正常显示颜色
+		<withJansi>true</withJansi> 
+		-->
+		<encoder>
+			<!-- <pattern>%d %5p | %t | %-55logger{55} | %m | %n</pattern> -->
+			<pattern>[%thread] %highlight(%-5level) %cyan(%logger{15}) - %highlight(%msg) %n</pattern>
+			<!-- <pattern>%highlight(%cn) %red(%d{hh:MM:ss}) %green([%20logger{0}]) - %cyan(%message%n)</pattern> -->
+		</encoder>
+	</appender>
+	
+	<logger name="org.springframework" level="DEBUG" />
+	<logger name="io.github.hooj0.springdata.fabric.chaincode" level="DEBUG" />
+
+	<root level="DEBUG">
+		<appender-ref ref="console" />
+	</root>
+</configuration>
