@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.entity;
+package io.github.hooj0.springdata.fabric.chaincode.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -6,7 +6,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
 
 /**
- * <b>function:</b>
+ * spring data fabric chaincode basic abstract entity, other entity objects need to inherit this entity
  * @author hoojo
  * @createDate 2018年7月17日 下午5:18:44
  * @file BaseEntity.java
@@ -17,7 +17,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
  * @version 1.0
  */
 @Entity
-public class BaseEntity {
+public abstract class AbstractEntity {
 
 	@Override
 	public String toString() {

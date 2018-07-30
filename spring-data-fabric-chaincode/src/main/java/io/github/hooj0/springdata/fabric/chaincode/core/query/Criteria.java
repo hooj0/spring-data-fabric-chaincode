@@ -32,7 +32,7 @@ public class Criteria {
 	/** 链码类型 */
 	private Type type;
 	/** 认证组织 */
-	private String[] orgs;
+	private String org;
 	
 	private Criteria() {
 	}
@@ -43,7 +43,7 @@ public class Criteria {
 		this.path = criteria.path;
 		this.version = criteria.version;
 		this.type = criteria.type;
-		this.orgs = criteria.orgs;
+		this.org = criteria.org;
 	}
 	
 	public ChaincodeID getChaincodeID() {
@@ -99,8 +99,8 @@ public class Criteria {
 			return this;
 		}
 
-		public CriteriaBuilder orgs(String[] orgs) {
-			criteria.orgs = orgs;
+		public CriteriaBuilder org(String org) {
+			criteria.org = org;
 			return this;
 		}
 		

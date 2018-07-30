@@ -7,7 +7,7 @@ import org.springframework.data.mapping.context.MappingContext;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
-import io.github.hooj0.springdata.fabric.chaincode.entity.BaseEntity;
+import io.github.hooj0.springdata.fabric.chaincode.domain.AbstractEntity;
 
 /**
  * Chaincode Converter 转换器接口，转换属性或实体对象，
@@ -21,7 +21,7 @@ import io.github.hooj0.springdata.fabric.chaincode.entity.BaseEntity;
  * @email hoojo_@126.com
  * @version 1.0
  */
-public interface ChaincodeConverter extends EntityConverter<ChaincodePersistentEntity<?>, ChaincodePersistentProperty, BaseEntity, String> {
+public interface ChaincodeConverter extends EntityConverter<ChaincodePersistentEntity<?>, ChaincodePersistentProperty, AbstractEntity, String> {
 
 	public Object getJSONMapper();
 	

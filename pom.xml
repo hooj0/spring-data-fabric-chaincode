@@ -59,6 +59,9 @@
 
 		<!-- Test -->
 		<junit.version>4.12</junit.version>
+
+		<!-- Fabric SDKs Commons -->
+		<fabric-sdk-commons.version>1.0-SNAPSHOT</fabric-sdk-commons.version>
 	</properties>
 
 	<modules>

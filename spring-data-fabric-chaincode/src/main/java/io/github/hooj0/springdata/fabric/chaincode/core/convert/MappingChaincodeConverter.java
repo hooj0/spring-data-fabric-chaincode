@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
-import io.github.hooj0.springdata.fabric.chaincode.entity.BaseEntity;
+import io.github.hooj0.springdata.fabric.chaincode.domain.AbstractEntity;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -83,14 +83,14 @@ public class MappingChaincodeConverter extends AbstractChaincodeConverter implem
 	}
 	
 	@Override
-	public <R extends BaseEntity> R read(Class<R> clazz, String json) {
+	public <R extends AbstractEntity> R read(Class<R> clazz, String json) {
 		log.debug("clazz: {}", clazz);
 		log.debug("json: {}", json);
 		return null;
 	}
 
 	@Override
-	public void write(BaseEntity entity, String json) {
+	public void write(AbstractEntity entity, String json) {
 		log.debug("entity: {}", entity);
 		log.debug("json: {}", json);
 		
@@ -99,6 +99,6 @@ public class MappingChaincodeConverter extends AbstractChaincodeConverter implem
 		}
 
 		TypeInformation<? extends Object> type = ClassTypeInformation.from(entity.getClass());
-		conversions.hasCustomWriteTarget(type.getClass(), BaseEntity.class);
+		conversions.hasCustomWriteTarget(type.getClass(), AbstractEntity.class);
 	}
 }
