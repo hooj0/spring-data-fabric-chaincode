@@ -30,7 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Chaincode CRUD 基本的操作
+ * Chaincode CRUD based operation test units
  * @author hoojo
  * @createDate 2018年7月20日 上午11:34:28
  * @file BasicCRUDRepositoryTests.java
@@ -77,22 +77,21 @@ public class BasicCRUDRepositoryTests {
 	
 	@Test
 	public void testInstantiate() {
-		repo.instantiate("".getBytes(), "move", "a", "b");
-		InputStream is = null;
-		repo.instantiate(is, "move", "a", "b");
-		repo.instantiate(new File("a.yaml"), "move", "a", "b");
-		repo.instantiate(new File("a.yml"), "move", "a", "b");
-		repo.instantiate(new File("a.json"), "move", "a", "b");
+		repo.instantiate("move", "a", "b");
+		repo.instantiate("move", "a", "b");
+		repo.instantiate("move", "a", "b");
+		repo.instantiate("move", "a", "b");
+		repo.instantiate("move", "a", "b");
+		
 	}
 	
 	@Test
 	public void testUpgrade() {
-		repo.upgrade("".getBytes(), "v1.3", "move", "a", "b");
-		InputStream is = null;
-		repo.upgrade(is, "move", "v1.3", "a", "b");
-		repo.upgrade(new File("a.yaml"), "v1.3", "move", "a", "b");
-		repo.upgrade(new File("a.yml"), "v1.3", "move", "a", "b");
-		repo.upgrade(new File("a.json"), "v1.3", "move", "a", "b");
+		repo.upgrade("v1.3", "move", "a", "b");
+		repo.upgrade("move", "v1.3", "a", "b");
+		repo.upgrade("v1.3", "move", "a", "b");
+		repo.upgrade("v1.3", "move", "a", "b");
+		repo.upgrade("v1.3", "move", "a", "b");
 	}
 	
 	@Chaincode(org = "org2", channel = "mychannel_1", name = "mycc", type = Type.GO_LANG, version = "1.1", path = "github.com/example_cc")
