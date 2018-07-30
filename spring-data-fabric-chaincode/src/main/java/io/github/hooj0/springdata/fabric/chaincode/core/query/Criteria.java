@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * Chaincode 智能合约 操作条件对象，包装常用的条件
+ * Chaincode repository common criteria
  * @author hoojo
  * @createDate 2018年7月19日 下午6:17:16
  * @file Criteria.java
@@ -19,7 +19,7 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-public class Criteria {
+public final class Criteria {
 
 	/** 通道名称 */
 	private String channel;
