@@ -55,6 +55,7 @@
 		<!-- Logging -->
 		<logback.version>1.0.13</logback.version>
 		<slf4j.version>1.7.5</slf4j.version>
+		<jansi.version>1.17.1</jansi.version>
 
 		<!-- Test -->
 		<junit.version>4.12</junit.version>
