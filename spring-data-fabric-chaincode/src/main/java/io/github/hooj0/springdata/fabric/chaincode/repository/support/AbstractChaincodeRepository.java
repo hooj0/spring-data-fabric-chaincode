@@ -4,19 +4,22 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.concurrent.CompletableFuture;
 
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
+import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.springframework.util.Assert;
 
-import com.google.common.io.Files;
-
-import io.github.hooj0.fabric.sdk.commons.core.execution.option.InvokeOptions;
-import io.github.hooj0.fabric.sdk.commons.core.execution.option.QueryOptions;
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.InstallCriteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.InstantiateCriteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.UpgradeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
 import lombok.NoArgsConstructor;
@@ -39,29 +42,317 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 
 	protected ChaincodeEntityInformation<T, ?> entityInformation;
 	protected ChaincodeOperations operations;
-	protected Criteria globalCriteria;
 	protected Class<T> entityClass;
+	protected Criteria criteria;
 
 	public AbstractChaincodeRepository(ChaincodeOperations operations) {
 		this.operations = operations;
-		Assert.notNull(operations, "ChaincodeOperations must not be null!");
 		
-		System.err.println("调用----------->>>AbstractChaincodeRepository");
+		Assert.notNull(operations, "ChaincodeOperations must not be null!");
 	}
 	
-	public AbstractChaincodeRepository(Criteria globalCriteria, ChaincodeEntityInformation<T, ?> entityInformation, ChaincodeOperations operations) {
+	public AbstractChaincodeRepository(Criteria criteria, ChaincodeEntityInformation<T, ?> entityInformation, ChaincodeOperations operations) {
 		this(operations);
-		Assert.notNull(globalCriteria, "globalCriteria must not be null!");
+		
+		Assert.notNull(criteria, "criteria must not be null!");
 
 		this.entityInformation = entityInformation;
-		this.globalCriteria = globalCriteria;
-		
-		System.err.println("调用----------->>>AbstractChaincodeRepository");
-		log.debug("globalCriteria: {}", globalCriteria);
-		
-		// setChannelName
-		// setOrgName
+		this.criteria = criteria;
+
+		log.debug("criteria: {}", criteria);
 	}
+	
+	@Override
+	public ResultSet invoke(String func) {
+		
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		
+		return this.operations.invoke(invokeCriteria, func);
+	}
+
+	@Override
+	public ResultSet invoke(String func, Object... args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		
+		return this.operations.invoke(invokeCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet invoke(String func, LinkedHashMap<String, Object> args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		
+		return this.operations.invoke(invokeCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeAsync(invokeCriteria, func);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeAsync(invokeCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeAsync(invokeCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeFor(invokeCriteria, func);
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func, Object... args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeFor(invokeCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args) {
+		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.invokeFor(invokeCriteria, func, args);
+	}
+
+	@Override
+	public String query(String func) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		// invokeCriteria.setClientUserContext(clientUserContext);
+		// invokeCriteria.setOptions(options);
+		// invokeCriteria.setOrderers(orderers);
+		// invokeCriteria.setTransactionsUser(transactionsUser);
+		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
+		
+		return this.operations.query(queryCriteria, func);
+	}
+
+	@Override
+	public String query(String func, Object... args) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		
+		return this.operations.query(queryCriteria, func, args);
+	}
+
+	@Override
+	public String query(String func, LinkedHashMap<String, Object> args) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		
+		return this.operations.query(queryCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet queryFor(String func) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		
+		return this.operations.queryFor(queryCriteria, func);
+	}
+
+	@Override
+	public ResultSet queryFor(String func, Object... args) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		
+		return this.operations.queryFor(queryCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet queryFor(String func, LinkedHashMap<String, Object> args) {
+		QueryCriteria queryCriteria = new QueryCriteria(criteria);
+		
+		return this.operations.queryFor(queryCriteria, func, args);
+	}
+	
+	@Override
+	public Collection<ProposalResponse> install(String chaincodeSourceLocation) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		
+		return this.operations.install(installCriteria, chaincodeSourceLocation);
+	}
+
+	@Override
+	public Collection<ProposalResponse> install(File chaincodeSourceFile) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		
+		return this.operations.install(installCriteria, chaincodeSourceFile);
+	}
+
+	@Override
+	public Collection<ProposalResponse> install(InputStream chaincodeInputStream) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		
+		return this.operations.install(installCriteria, chaincodeInputStream);
+	}
+
+	@Override
+	public ResultSet instantiate(String func) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiate(instantiateCriteria, func);
+	}
+
+	@Override
+	public ResultSet instantiate(String func, Object... args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiate(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet instantiate(String func, LinkedHashMap<String, Object> args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiate(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> instantiateAsync(String func) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateAsync(instantiateCriteria, func);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> instantiateAsync(String func, Object... args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateAsync(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> instantiateAsync(String func, LinkedHashMap<String, Object> args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateAsync(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent instantiateFor(String func) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateFor(instantiateCriteria, func);
+	}
+
+	@Override
+	public TransactionEvent instantiateFor(String func, Object... args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateFor(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent instantiateFor(String func, LinkedHashMap<String, Object> args) {
+		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
+		
+		return this.operations.instantiateFor(instantiateCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet upgrade(String func) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgrade(upgradeCriteria, func);
+	}
+
+	@Override
+	public ResultSet upgrade(String func, Object... args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgrade(upgradeCriteria, func, args);
+	}
+
+	@Override
+	public ResultSet upgrade(String func, LinkedHashMap<String, Object> args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgrade(upgradeCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> upgradeAsync(String func) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeAsync(upgradeCriteria, func);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> upgradeAsync(String func, Object... args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeAsync(upgradeCriteria, func, args);
+	}
+
+	@Override
+	public CompletableFuture<TransactionEvent> upgradeAsync(String func, LinkedHashMap<String, Object> args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeAsync(upgradeCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent upgradeFor(String func) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeFor(upgradeCriteria, func);
+	}
+
+	@Override
+	public TransactionEvent upgradeFor(String func, Object... args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeFor(upgradeCriteria, func, args);
+	}
+
+	@Override
+	public TransactionEvent upgradeFor(String func, LinkedHashMap<String, Object> args) {
+		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
+		
+		return this.operations.upgradeFor(upgradeCriteria, func, args);
+	}
+	
 	
 	@Override
 	public Class<T> getEntityClass() {
@@ -98,191 +389,5 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 			}
 		}
 		return resolveReturnedClassFromGenericType(clazz.getSuperclass());
-	}
-	
-	public String invoke(String func, String... args) {
-		log.debug("execution chaincode repository invoke -> func: {}, args: {}", func, args);
-		
-		System.err.println(this.globalCriteria);
-		
-		return "success";
-	}
-
-	public String query(String func, String... args) {
-		log.debug("execution chaincode repository query -> func: {}, args: {}", func, args);
-		
-		System.err.println(this.globalCriteria);
-		return "success";
-	}
-	
-	@Override
-	public void install(File chaincodeSourceFile) {
-		log.debug("execution chaincode repository invoke -> chaincodeSourceFile: {}", chaincodeSourceFile);
-		
-		System.err.println(this.globalCriteria);
-	}
-
-	@Override
-	public void install(InputStream chaincodeInputStream) {
-		log.debug("execution chaincode repository install -> chaincodeInputStream: {}", chaincodeInputStream);
-		
-		System.err.println(this.globalCriteria);
-	}
-
-	@Override
-	public String instantiate(byte[] policyAsBytes, String func, String... args) {
-		log.debug("execution chaincode repository instantiate -> policyAsBytes: {}, func: {}, args: {}", policyAsBytes.length, func, args);
-	
-		System.err.println(this.globalCriteria);
-		return "success";
-	}
-
-	@Override
-	public String instantiate(File policyFile, String func, String... args) {
-		log.debug("execution chaincode repository instantiate -> policyFile: {}, func: {}, args: {}", policyFile.length(), func, args);
-		
-		if (policyFile != null) {
-			String suffix = Files.getFileExtension(policyFile.getName());
-			if ("yaml".equalsIgnoreCase(suffix) || "yml".equalsIgnoreCase(suffix)) { // YAML 
-				System.out.println("yaml");
-			} else { // FILE
-				System.out.println("file");
-			}
-		}
-		
-		System.err.println(this.globalCriteria);
-		return "success";
-	}
-
-	@Override
-	public String instantiate(InputStream policyInputStream, String func, String... args) {
-		log.debug("execution chaincode repository instantiate -> policyInputStream: {}, func: {}, args: {}", policyInputStream, func, args);
-		
-		System.err.println(this.globalCriteria);
-		return "success";		
-	}
-
-	@Override
-	public String upgrade(byte[] policyAsBytes, String version, String func, String... args) {
-		log.debug("execution chaincode repository upgrade -> policyAsBytes: {}, func: {}, args: {}", policyAsBytes.length, func, args);
-		
-		System.err.println(this.globalCriteria);
-		return "success";				
-	}
-
-	@Override
-	public String upgrade(File policyFile, String version, String func, String... args) {
-		log.debug("execution chaincode repository upgrade -> policyFile: {}, func: {}, args: {}", policyFile.length(), func, args);
-		
-		if (policyFile != null) {
-			String suffix = Files.getFileExtension(policyFile.getName());
-			if ("yaml".equalsIgnoreCase(suffix) || "yml".equalsIgnoreCase(suffix)) { // YAML 
-				System.out.println("yaml");
-			} else { // FILE
-				System.out.println("file");
-			}
-		}
-		
-		System.err.println(this.globalCriteria);
-		return "success";
-	}
-
-	@Override
-	public String upgrade(InputStream policyInputStream, String version, String func, String... args) {
-		log.debug("execution chaincode repository upgrade -> policyInputStream: {}, func: {}, args: {}", policyInputStream, func, args);
-		
-		System.err.println(this.globalCriteria);
-		return "success";
-	}
-
-	@Override
-	public ResultSet invoke(String func) {
-		
-		operations.invoke(globalCriteria, func);
-		return null;
-	}
-
-	@Override
-	public ResultSet invoke(String func, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ResultSet invoke(String func, LinkedHashMap<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String query(String func) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String query(String func, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String query(String func, LinkedHashMap<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ResultSet queryFor(String func) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ResultSet queryFor(String func, Object... args) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ResultSet queryFor(String func, LinkedHashMap<String, Object> args) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
