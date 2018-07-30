@@ -27,6 +27,8 @@ hs_err_pid*
 
 *.classpath
 *.project
+*/.classpath
+*/.project
 *.settings
 .settings/*
 */.settings
