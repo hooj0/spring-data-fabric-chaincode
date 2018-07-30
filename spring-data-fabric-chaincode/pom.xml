@@ -136,6 +136,7 @@
 			<scope>test</scope>
 		</dependency>
         
+        <!-- fabric-sdk-commons -->
         <dependency>
         	<groupId>io.github.hooj0</groupId>
 			<artifactId>fabric-sdk-commons</artifactId>
