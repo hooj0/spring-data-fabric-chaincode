@@ -17,6 +17,7 @@ import io.github.hooj0.fabric.sdk.commons.core.support.ChaincodeDeployTemplate;
 import io.github.hooj0.fabric.sdk.commons.core.support.ChaincodeTransactionTemplate;
 import io.github.hooj0.fabric.sdk.commons.domain.Organization;
 import io.github.hooj0.fabric.sdk.commons.store.FabricKeyValueStore;
+import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.cache.ChaincodeOperationBeanCache;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
@@ -37,7 +38,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
  * @email hoojo_@126.com
  * @version 1.0
  */
-public class AbstractChaincodeTemplate implements ApplicationContextAware {
+public abstract class AbstractChaincodeTemplate implements ChaincodeOperations, ApplicationContextAware {
 
 	protected final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 	protected ApplicationContext applicationContext;
@@ -84,6 +85,11 @@ public class AbstractChaincodeTemplate implements ApplicationContextAware {
 		return converter;
 	}
 	
+	@Override
+	public ChaincodeConverter getConverter() {
+		return this.converter;
+	}
+	
 	protected ChaincodeTransactionOperations createTransactionOperations(Criteria criteria) {
 		if (this.beanCache.containsTransactionOperations(criteria)) {
 			return this.beanCache.getTransactionOperationCache(criteria);
@@ -104,6 +110,16 @@ public class AbstractChaincodeTemplate implements ApplicationContextAware {
 		return operations;
 	}
 	
+	@Override
+	public ChaincodeDeployOperations getChaincodeDeployOperations(Criteria criteria) {
+		return this.beanCache.getDeployOperationCache(criteria);
+	}
+
+	@Override
+	public ChaincodeTransactionOperations getChaincodeTransactionOperations(Criteria criteria) {
+		return this.beanCache.getTransactionOperationCache(criteria);
+	}
+	
 	public FabricConfiguration getConfig() {
 		return config;
 	}
@@ -112,10 +128,16 @@ public class AbstractChaincodeTemplate implements ApplicationContextAware {
 		return store;
 	}
 	
-	protected Organization getOrganization(Criteria criteria) {
+	public Organization getOrganization(Criteria criteria) {
 		Assert.hasText(criteria.getOrg(), "criteria.org property is empty!");
 		
 		return config.getOrganization(criteria.getOrg());
+	}
+	
+	public Organization getOrganization(String org) {
+		Assert.hasText(org, "org property is empty!");
+		
+		return config.getOrganization(org);
 	}
 	
 	protected <T extends Options> void afterCriteriaSet(T target) {
