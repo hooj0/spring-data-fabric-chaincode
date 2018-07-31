@@ -11,9 +11,12 @@ import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstallProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstantiateProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.UpgradeProposal;
 
 /**
- * 部署智能合约 Chaincode Repository
+ * chaincode deploy `install & instantiate & upgrade` repository
  * @author hoojo
  * @createDate 2018年7月19日 上午8:56:34
  * @file DeployChaincodeRepository.java
@@ -33,7 +36,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午3:58:26
 	 * @param chaincodeSourceLocation 智能合约源码文件位置
 	 */
-	Collection<ProposalResponse> install(String chaincodeSourceLocation);
+	Collection<ProposalResponse> install(InstallProposal proposal, String chaincodeSourceLocation);
 
 	/**
 	 * 安装智能合约 Chaincode 
@@ -41,7 +44,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午3:58:26
 	 * @param chaincodeSourceFile 智能合约源码文件
 	 */
-	Collection<ProposalResponse> install(File chaincodeSourceFile);
+	Collection<ProposalResponse> install(InstallProposal proposal, File chaincodeSourceFile);
 	
 	/**
 	 * 安装智能合约 Chaincode 
@@ -49,7 +52,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午3:59:08
 	 * @param chaincodeInputStream 智能合约源码文件Stream
 	 */
-	Collection<ProposalResponse> install(InputStream chaincodeInputStream);
+	Collection<ProposalResponse> install(InstallProposal proposal, InputStream chaincodeInputStream);
 	
 	// instantiate
 	
@@ -59,7 +62,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午4:03:40
 	 * @param func 智能合约Chaincode初始化方法
 	 */
-	ResultSet instantiate(String func);
+	ResultSet instantiate(InstantiateProposal proposal, String func);
 	
 	/**
 	 * 实例化智能合约 Chaincode
@@ -68,7 +71,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	ResultSet instantiate(String func, Object... args);
+	ResultSet instantiate(InstantiateProposal proposal, String func, Object... args);
 
 	/**
 	 * 实例化智能合约 Chaincode
@@ -77,7 +80,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	ResultSet instantiate(String func, LinkedHashMap<String, Object> args);
+	ResultSet instantiate(InstantiateProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 	// instantiate async
 	
@@ -87,7 +90,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午4:03:40
 	 * @param func 智能合约Chaincode初始化方法
 	 */
-	CompletableFuture<TransactionEvent> instantiateAsync(String func);
+	CompletableFuture<TransactionEvent> instantiateAsync(InstantiateProposal proposal, String func);
 	
 	/**
 	 * 实例化智能合约 Chaincode 返回异步线程模型
@@ -96,7 +99,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	CompletableFuture<TransactionEvent> instantiateAsync(String func, Object... args);
+	CompletableFuture<TransactionEvent> instantiateAsync(InstantiateProposal proposal, String func, Object... args);
 
 	/**
 	 * 实例化智能合约 Chaincode 返回异步线程模型
@@ -105,7 +108,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	CompletableFuture<TransactionEvent> instantiateAsync(String func, LinkedHashMap<String, Object> args);
+	CompletableFuture<TransactionEvent> instantiateAsync(InstantiateProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 	// instantiate async return event
 	
@@ -115,7 +118,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午4:03:40
 	 * @param func 智能合约Chaincode初始化方法
 	 */
-	TransactionEvent instantiateFor(String func);
+	TransactionEvent instantiateFor(InstantiateProposal proposal, String func);
 	
 	/**
 	 * 实例化智能合约 Chaincode 返回交易事件结果
@@ -124,7 +127,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	TransactionEvent instantiateFor(String func, Object... args);
+	TransactionEvent instantiateFor(InstantiateProposal proposal, String func, Object... args);
 
 	/**
 	 * 实例化智能合约 Chaincode 返回交易事件结果
@@ -133,7 +136,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	TransactionEvent instantiateFor(String func, LinkedHashMap<String, Object> args);
+	TransactionEvent instantiateFor(InstantiateProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 	
 	
@@ -144,7 +147,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午4:03:40
 	 * @param func 智能合约Chaincode初始化方法
 	 */
-	ResultSet upgrade(String func);
+	ResultSet upgrade(UpgradeProposal proposal, String func);
 	
 	/**
 	 * 升级智能合约 Chaincode
@@ -153,7 +156,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	ResultSet upgrade(String func, Object... args);
+	ResultSet upgrade(UpgradeProposal proposal, String func, Object... args);
 
 	/**
 	 * 升级智能合约 Chaincode
@@ -162,7 +165,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	ResultSet upgrade(String func, LinkedHashMap<String, Object> args);
+	ResultSet upgrade(UpgradeProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 	// upgrade async
 	
@@ -172,7 +175,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @createDate 2018年7月20日 下午4:03:40
 	 * @param func 智能合约Chaincode初始化方法
 	 */
-	CompletableFuture<TransactionEvent> upgradeAsync(String func);
+	CompletableFuture<TransactionEvent> upgradeAsync(UpgradeProposal proposal, String func);
 	
 	/**
 	 * 升级智能合约 Chaincode，返回异步线程模型
@@ -181,7 +184,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	CompletableFuture<TransactionEvent> upgradeAsync(String func, Object... args);
+	CompletableFuture<TransactionEvent> upgradeAsync(UpgradeProposal proposal, String func, Object... args);
 
 	/**
 	 * 升级智能合约 Chaincode，返回异步线程模型
@@ -190,7 +193,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	CompletableFuture<TransactionEvent> upgradeAsync(String func, LinkedHashMap<String, Object> args);
+	CompletableFuture<TransactionEvent> upgradeAsync(UpgradeProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 	// upgrade async return event
 	/**
@@ -200,7 +203,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	TransactionEvent upgradeFor(String func);
+	TransactionEvent upgradeFor(UpgradeProposal proposal, String func);
 	
 	/**
 	 * 升级智能合约 Chaincode，返回事件结果
@@ -209,7 +212,7 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	TransactionEvent upgradeFor(String func, Object... args);
+	TransactionEvent upgradeFor(UpgradeProposal proposal, String func, Object... args);
 
 	/**
 	 * 升级智能合约 Chaincode，返回事件结果
@@ -218,6 +221,6 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 * @param func 智能合约Chaincode初始化方法
 	 * @param args 智能合约Chaincode初始化方法参数
 	 */
-	TransactionEvent upgradeFor(String func, LinkedHashMap<String, Object> args);
+	TransactionEvent upgradeFor(UpgradeProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
 }
