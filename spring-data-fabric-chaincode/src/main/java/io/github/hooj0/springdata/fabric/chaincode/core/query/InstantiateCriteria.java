@@ -24,13 +24,8 @@ public final class InstantiateCriteria extends InstantiateOptions {
 	public InstantiateCriteria(Criteria criteria) {
 		super();
 		this.criteria = criteria;
-		this.setChaincodeId(this.criteria.getChaincodeID());
-	}
-	
-	public InstantiateCriteria setCriteria(Criteria criteria) {
-		this.criteria = criteria;
 		
 		this.setChaincodeId(this.criteria.getChaincodeID());
-		return this;
+		this.setChaincodeType(this.criteria.getType());
 	}
 }
