@@ -24,12 +24,8 @@ public final class InvokeCriteria extends InvokeOptions {
 	public InvokeCriteria(Criteria criteria) {
 		super();
 		this.criteria = criteria;
+		
 		this.setChaincodeId(this.criteria.getChaincodeID());
-	}
-	
-	public InvokeCriteria setCriteria(Criteria criteria) {
-		this.criteria = criteria;
-		this.setChaincodeId(this.criteria.getChaincodeID());
-		return this;
+		this.setChaincodeType(this.criteria.getType());
 	}
 }
