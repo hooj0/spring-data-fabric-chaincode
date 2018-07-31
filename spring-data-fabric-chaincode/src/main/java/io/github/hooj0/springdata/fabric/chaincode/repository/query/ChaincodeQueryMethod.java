@@ -33,7 +33,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
- * Repository 查询方法的具体信息
+ * chaincode Repository query method information
  * @author hoojo
  * @createDate 2018年7月18日 上午9:44:31
  * @file ChaincodeQueryMethod.java
@@ -49,8 +49,8 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	private final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
 	private @Nullable ChaincodeEntityMetadata<?> metadata;
 	private final Method method;
-	private final Criteria globalCriteria;
 	
+	private final Criteria criteria;
 	private final ProposalType proposalType;
 	private final Proposal proposalAnnotated;
 	private final Deploy deployAnnotated;
@@ -59,12 +59,12 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	private ClassToInstanceMap<Annotation> annotationInstatnces = MutableClassToInstanceMap.<Annotation>create();
 	
 	@SuppressWarnings("unchecked")
-	public ChaincodeQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext, Criteria globalCriteria) {
+	public ChaincodeQueryMethod(Method method, RepositoryMetadata metadata, ProjectionFactory factory, MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext, Criteria criteria) {
 		super(method, metadata, factory);
 		
 		this.method = method;
 		this.mappingContext = mappingContext;
-		this.globalCriteria = globalCriteria;
+		this.criteria = criteria;
 		this.proposalAnnotated = AnnotatedElementUtils.findMergedAnnotation(method, Proposal.class);
 
 		verify(method, metadata);
@@ -84,7 +84,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		System.out.println("Proposal: " + proposalAnnotated);
 		System.out.println("Deploy: " + deployAnnotated);
 		System.out.println("annotationInstatnces: " + annotationInstatnces);
-		System.out.println("globalCriteria: " + globalCriteria);
+		System.out.println("criteria: " + criteria);
 		System.out.println("--------------------------------------------------");
 	}
 
@@ -181,8 +181,8 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		return null;
 	}
 	
-	public Criteria getGlobalCriteria() {
-		return globalCriteria;
+	public Criteria getCriteria() {
+		return this.criteria;
 	}
 	
 	@Override
@@ -214,8 +214,8 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		return this.metadata;
 	}
 
-	public String getRequiredAnnotatedQuery() {
-		return Optional.of(this.proposalAnnotated).map(Proposal::value).orElseThrow(() -> new IllegalStateException("Chaincode Repository method " + this + " has no annotated Proposal"));
+	public String[] getRequiredAnnotatedQuery() {
+		return Optional.of(this.proposalAnnotated).map(Proposal::args).orElseThrow(() -> new IllegalStateException("Chaincode Repository method " + this + " has no annotated Proposal"));
 	}
 	
 	public void verify(Method method, RepositoryMetadata metadata) {
