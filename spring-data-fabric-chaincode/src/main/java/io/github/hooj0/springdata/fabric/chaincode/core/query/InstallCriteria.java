@@ -24,13 +24,8 @@ public final class InstallCriteria extends InstallOptions {
 	public InstallCriteria(Criteria criteria) {
 		super();
 		this.criteria = criteria;
-		this.setChaincodeId(this.criteria.getChaincodeID());
-	}
-	
-	public InstallCriteria setCriteria(Criteria criteria) {
-		this.criteria = criteria;
 		
 		this.setChaincodeId(this.criteria.getChaincodeID());
-		return this;
+		this.setChaincodeType(this.criteria.getType());
 	}
 }
