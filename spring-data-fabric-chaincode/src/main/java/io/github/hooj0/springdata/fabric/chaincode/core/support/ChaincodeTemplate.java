@@ -11,13 +11,9 @@ import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.springframework.util.Assert;
 
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
-import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
-import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.fabric.sdk.commons.store.FabricKeyValueStore;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.InstallCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.InstantiateCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
@@ -37,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  */
 @Slf4j
-public class ChaincodeTemplate extends AbstractChaincodeTemplate implements ChaincodeOperations {
+public class ChaincodeTemplate extends AbstractChaincodeTemplate {
 
 	public ChaincodeTemplate() {
 		super();
@@ -49,21 +45,6 @@ public class ChaincodeTemplate extends AbstractChaincodeTemplate implements Chai
 	
 	public ChaincodeTemplate(ChaincodeConverter converter, FabricConfiguration config, FabricKeyValueStore store) {
 		super(converter, config, store);
-	}
-
-	@Override
-	public ChaincodeConverter getConverter() {
-		return this.converter;
-	}
-	
-	@Override
-	public ChaincodeDeployOperations getChaincodeDeployOperations(Criteria criteria) {
-		return this.beanCache.getDeployOperationCache(criteria);
-	}
-
-	@Override
-	public ChaincodeTransactionOperations getChaincodeTransactionOperations(Criteria criteria) {
-		return this.beanCache.getTransactionOperationCache(criteria);
 	}
 
 	@Override
