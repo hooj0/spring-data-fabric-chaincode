@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
-import org.springframework.data.repository.query.ResultProcessor;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
@@ -27,10 +27,12 @@ import lombok.extern.slf4j.Slf4j;
 public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 
 	private static final Pattern PARAMETER_PLACEHOLDER = Pattern.compile("\\?(\\d+)");
+	private static final String QUERY_ARGS_SEPARATOR = "|,|";
+
 	private String query;
 	
-	public StringBasedChaincodeQuery(ChaincodeQueryMethod queryMethod, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
-		this(queryMethod.getRequiredAnnotatedQuery(), queryMethod, operations, expressionParser, evaluationContextProvider);
+	public StringBasedChaincodeQuery(ChaincodeQueryMethod method, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
+		this(StringUtils.join(method.getRequiredAnnotatedQuery(), QUERY_ARGS_SEPARATOR), method, operations, expressionParser, evaluationContextProvider);
 	}
 
 	public StringBasedChaincodeQuery(String namedQuery, ChaincodeQueryMethod queryMethod, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
@@ -38,52 +40,16 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		
 		this.query = namedQuery;
 		//this.stringBasedQuery = new StringBasedQuery(namedQuery, new ExpressionEvaluatingParameterBinder(expressionParser, evaluationContextProvider));
-		if (!queryMethod.hasDeployAnnotated()) {
-			
-		} else {
-		}
-	}
-
-	public Object execute2(Object[] parameterValues) {
-		
-		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
-		log.info("execute accessor: {}", accessor);
-		
-		String[] stringQueries = createQuery(accessor);
-		log.info("query stringQueries: {}", new Object[] { stringQueries });
-		
-		ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
-		Class<?> typeToRead = processor.getReturnedType().getTypeToRead();
-		log.info("query result: {}", typeToRead);
-		
-		/*
-		FindWithQuery<?> find = typeToRead == null //
-				? executableFind //
-				: executableFind.as(typeToRead);
-
-		MongoQueryExecution execution = getExecution(accessor, find);
-
-		return processor.processResult(execution.execute(query));
-		*/
-		if (method.isPageQuery()) { // page 查询
-			//return operations.queryForPage(stringQuery, queryMethod.getEntityInformation().getJavaType());
-		} else if (method.hasProposalAnnotated()) {
-			//return operations.count(null, queryMethod.getEntityInformation().getJavaType());
-			
-			return null;
-		}
-
-		// 对象查询
-		//return operations.queryForObject(stringQuery, queryMethod.getEntityInformation().getJavaType());
-		return null;
 	}
 
 	@Override
 	protected String[] createQuery(ParametersParameterAccessor parameterAccessor) {
-		String queryString = replacePlaceholders(this.query, parameterAccessor);
-		
-		log.info("query string: {}", queryString);
-		return new String[] { queryString };
+		log.info("args string: {}", query);
+
+		String result = replacePlaceholders(query, parameterAccessor);
+
+		log.info("args result: {}", new Object[] { result });
+		return StringUtils.split(result, QUERY_ARGS_SEPARATOR);
 	}
 
 	// 替换占位符，将其替换为正确的参数
