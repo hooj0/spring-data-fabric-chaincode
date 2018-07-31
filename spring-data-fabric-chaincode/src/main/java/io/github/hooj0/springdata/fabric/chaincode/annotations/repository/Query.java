@@ -31,4 +31,27 @@ public @interface Query {
 
 	@AliasFor(annotation = Proposal.class)
 	String value() default "";
+	
+	/** 执行Chaincode智能合约的方法名称，默认为当前注解方法的名称 */
+	String func() default "";
+	
+	/** 执行Chaincode智能合约的参数，支持占位符或spel表达式，默认取参数列表  */
+	@AliasFor(annotation = Proposal.class, attribute = "args")
+	String[] args() default {};
+	
+	/** HFClient 客户端上下文用户  */
+	@AliasFor(annotation = Proposal.class, attribute = "clientUser")
+	String clientUser() default "";
+	
+	/** 当前请求用户  */
+	@AliasFor(annotation = Proposal.class, attribute = "requestUser")
+	String requestUser() default "";
+	
+	/** 发送给特定的 peer节点 */
+	@AliasFor(annotation = Proposal.class, attribute = "specificPeers")
+	boolean specificPeers() default false;
+	
+	/** 请求提议等待响应事件 */
+	@AliasFor(annotation = Proposal.class, attribute = "waitTime")
+	long waitTime() default 0;
 }
