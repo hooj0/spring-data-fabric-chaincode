@@ -4,6 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-data-fabric-chaincode</artifactId>
 	
+	<!-- 
+		add apache commons-beanutils jar
+	 -->
 	<parent>
 		<groupId>spring.data.fabric.chaincode</groupId>
 		<artifactId>spring-data-fabric-chaincode-parent</artifactId>
@@ -87,6 +90,13 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${commons-lang.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<dependency>
+		    <groupId>commons-beanutils</groupId>
+		    <artifactId>commons-beanutils</artifactId>
+		    <version>1.9.3</version>
 		</dependency>
 		
 		<!-- lombok -->
