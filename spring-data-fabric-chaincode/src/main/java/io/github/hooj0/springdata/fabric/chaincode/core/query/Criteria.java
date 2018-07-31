@@ -54,11 +54,11 @@ public final class Criteria {
 		
 		private Criteria criteria;
 		
-		public CriteriaBuilder() {
+		private CriteriaBuilder() {
 			this.criteria = new Criteria();
 		}
 		
-		public CriteriaBuilder(Criteria criteria) {
+		private CriteriaBuilder(Criteria criteria) {
 			this.criteria = new Criteria(criteria);
 		}
 		
