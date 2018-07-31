@@ -24,13 +24,8 @@ public final class UpgradeCriteria extends UpgradeOptions {
 	public UpgradeCriteria(Criteria criteria) {
 		super();
 		this.criteria = criteria;
-		this.setChaincodeId(this.criteria.getChaincodeID());
-	}
-	
-	public UpgradeCriteria setCriteria(Criteria criteria) {
-		this.criteria = criteria;
 		
 		this.setChaincodeId(this.criteria.getChaincodeID());
-		return this;
+		this.setChaincodeType(this.criteria.getType());
 	}
 }
