@@ -13,6 +13,7 @@ import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
 import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.fabric.sdk.commons.domain.Organization;
 import io.github.hooj0.fabric.sdk.commons.store.FabricKeyValueStore;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
@@ -41,10 +42,15 @@ public interface ChaincodeOperations {
 	ChaincodeDeployOperations getChaincodeDeployOperations(Criteria criteria);
 
 	ChaincodeTransactionOperations getChaincodeTransactionOperations(Criteria criteria);
-	
-	public FabricConfiguration getConfig();
 
-	public FabricKeyValueStore getStore();
+	Organization getOrganization(String org);
+
+	Organization getOrganization(Criteria criteria);
+
+	FabricConfiguration getConfig();
+
+	FabricKeyValueStore getStore();
+	
 	
 	
 	// install
