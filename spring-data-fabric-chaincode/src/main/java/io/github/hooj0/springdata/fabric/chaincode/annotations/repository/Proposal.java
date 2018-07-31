@@ -7,6 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.data.annotation.QueryAnnotation;
 
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
@@ -31,5 +32,21 @@ public @interface Proposal {
 
 	String value() default "";
 	
+	/** 执行Chaincode智能合约的参数，支持占位符或spel表达式，默认取参数列表  */
+	@AliasFor(annotation = Proposal.class, attribute = "args")
+	String[] args() default {};
+	
 	ProposalType type() default ProposalType.INVOKE;
+	
+	/** HFClient 客户端上下文用户  */
+	String clientUser() default "";
+	
+	/** 当前请求用户  */
+	String requestUser() default "";
+	
+	/** 发送给特定的 peer节点 */
+	boolean specificPeers() default false;
+	
+	/** 请求提议等待响应事件 */
+	long waitTime() default 0;
 }
