@@ -29,6 +29,29 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 @Documented
 public @interface Install {
 
+	/** Chaincode 源码目录位置 */
+	String chaincodeLocation();
+
 	@AliasFor(annotation = Proposal.class)
 	String value() default "";
+	
+	/** HFClient 客户端上下文用户  */
+	@AliasFor(annotation = Proposal.class, attribute = "clientUser")
+	String clientUser() default "";
+	
+	/** 当前请求用户  */
+	@AliasFor(annotation = Proposal.class, attribute = "requestUser")
+	String requestUser() default "";
+	
+	/** 发送给特定的 peer节点 */
+	@AliasFor(annotation = Proposal.class, attribute = "specificPeers")
+	boolean specificPeers() default false;
+	
+	/** 请求提议等待响应事件 */
+	@AliasFor(annotation = Proposal.class, attribute = "waitTime")
+	long waitTime() default 0;
+	
+	/** 安装升级的版本，在升级版本时使用 */
+	@AliasFor(annotation = Proposal.class, attribute = "version")
+	String version() default "";
 }
