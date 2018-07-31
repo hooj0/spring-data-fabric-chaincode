@@ -1,27 +1,23 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
-import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.concurrent.CompletableFuture;
 
-import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
-import org.hyperledger.fabric.sdk.ProposalResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.hyperledger.fabric.sdk.User;
 import org.springframework.util.Assert;
 
-import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.InstantiateOptions;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
+import io.github.hooj0.fabric.sdk.commons.domain.Organization;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.InstallCriteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.InstantiateCriteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.UpgradeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstantiateProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.Proposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.TransactionProposal;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @NoArgsConstructor
 @Slf4j
-public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, DeployChaincodeRepository<T> {
+public abstract class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, DeployChaincodeRepository<T> {
 
 	protected ChaincodeEntityInformation<T, ?> entityInformation;
 	protected ChaincodeOperations operations;
@@ -62,297 +58,56 @@ public class AbstractChaincodeRepository<T> implements ChaincodeRepository<T>, D
 		log.debug("criteria: {}", criteria);
 	}
 	
-	@Override
-	public ResultSet invoke(String func) {
-		
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		
-		return this.operations.invoke(invokeCriteria, func);
-	}
+	protected void afterCriteriaSet(Proposal proposal, Options options) {
 
-	@Override
-	public ResultSet invoke(String func, Object... args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
+		bind(proposal, options);
 		
-		return this.operations.invoke(invokeCriteria, func, args);
-	}
+		if (proposal instanceof TransactionProposal && options instanceof TransactionsOptions) {
+			TransactionProposal transactionProposal = (TransactionProposal) proposal;
+			TransactionsOptions transactionsOptions = (TransactionsOptions) options;
 
-	@Override
-	public ResultSet invoke(String func, LinkedHashMap<String, Object> args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
+			bind(transactionProposal, transactionsOptions);
+		}
 		
-		return this.operations.invoke(invokeCriteria, func, args);
-	}
+		if (proposal instanceof InstantiateProposal && options instanceof InstantiateOptions) {
+			InstantiateProposal instantiateProposal = (InstantiateProposal) proposal;
+			InstantiateOptions instantiateOptions = (InstantiateOptions) options;
 
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeAsync(invokeCriteria, func);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeAsync(invokeCriteria, func, args);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeAsync(invokeCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeFor(invokeCriteria, func);
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func, Object... args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeFor(invokeCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args) {
-		InvokeCriteria invokeCriteria = new InvokeCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.invokeFor(invokeCriteria, func, args);
-	}
-
-	@Override
-	public String query(String func) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		// invokeCriteria.setClientUserContext(clientUserContext);
-		// invokeCriteria.setOptions(options);
-		// invokeCriteria.setOrderers(orderers);
-		// invokeCriteria.setTransactionsUser(transactionsUser);
-		// invokeCriteria.setTransactionWaitTime(transactionWaitTime);
-		
-		return this.operations.query(queryCriteria, func);
-	}
-
-	@Override
-	public String query(String func, Object... args) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		
-		return this.operations.query(queryCriteria, func, args);
-	}
-
-	@Override
-	public String query(String func, LinkedHashMap<String, Object> args) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		
-		return this.operations.query(queryCriteria, func, args);
-	}
-
-	@Override
-	public ResultSet queryFor(String func) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		
-		return this.operations.queryFor(queryCriteria, func);
-	}
-
-	@Override
-	public ResultSet queryFor(String func, Object... args) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		
-		return this.operations.queryFor(queryCriteria, func, args);
-	}
-
-	@Override
-	public ResultSet queryFor(String func, LinkedHashMap<String, Object> args) {
-		QueryCriteria queryCriteria = new QueryCriteria(criteria);
-		
-		return this.operations.queryFor(queryCriteria, func, args);
+			bind(instantiateProposal, instantiateOptions);
+		}
 	}
 	
-	@Override
-	public Collection<ProposalResponse> install(String chaincodeSourceLocation) {
-		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		
-		return this.operations.install(installCriteria, chaincodeSourceLocation);
-	}
-
-	@Override
-	public Collection<ProposalResponse> install(File chaincodeSourceFile) {
-		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		
-		return this.operations.install(installCriteria, chaincodeSourceFile);
-	}
-
-	@Override
-	public Collection<ProposalResponse> install(InputStream chaincodeInputStream) {
-		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		
-		return this.operations.install(installCriteria, chaincodeInputStream);
-	}
-
-	@Override
-	public ResultSet instantiate(String func) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiate(instantiateCriteria, func);
-	}
-
-	@Override
-	public ResultSet instantiate(String func, Object... args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiate(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public ResultSet instantiate(String func, LinkedHashMap<String, Object> args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiate(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> instantiateAsync(String func) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateAsync(instantiateCriteria, func);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> instantiateAsync(String func, Object... args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateAsync(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> instantiateAsync(String func, LinkedHashMap<String, Object> args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateAsync(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent instantiateFor(String func) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateFor(instantiateCriteria, func);
-	}
-
-	@Override
-	public TransactionEvent instantiateFor(String func, Object... args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateFor(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent instantiateFor(String func, LinkedHashMap<String, Object> args) {
-		InstantiateCriteria instantiateCriteria = new InstantiateCriteria(criteria);
-		
-		return this.operations.instantiateFor(instantiateCriteria, func, args);
-	}
-
-	@Override
-	public ResultSet upgrade(String func) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgrade(upgradeCriteria, func);
-	}
-
-	@Override
-	public ResultSet upgrade(String func, Object... args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgrade(upgradeCriteria, func, args);
-	}
-
-	@Override
-	public ResultSet upgrade(String func, LinkedHashMap<String, Object> args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgrade(upgradeCriteria, func, args);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> upgradeAsync(String func) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeAsync(upgradeCriteria, func);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> upgradeAsync(String func, Object... args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeAsync(upgradeCriteria, func, args);
-	}
-
-	@Override
-	public CompletableFuture<TransactionEvent> upgradeAsync(String func, LinkedHashMap<String, Object> args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeAsync(upgradeCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent upgradeFor(String func) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeFor(upgradeCriteria, func);
-	}
-
-	@Override
-	public TransactionEvent upgradeFor(String func, Object... args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeFor(upgradeCriteria, func, args);
-	}
-
-	@Override
-	public TransactionEvent upgradeFor(String func, LinkedHashMap<String, Object> args) {
-		UpgradeCriteria upgradeCriteria = new UpgradeCriteria(criteria);
-		
-		return this.operations.upgradeFor(upgradeCriteria, func, args);
+	protected void bind(Proposal proposal, Options options) {
+		options.setSpecificPeers(proposal.isSpecificPeers());
+		options.setClientUserContext(getUser(proposal.getClientUser()));
+		options.setProposalWaitTime(proposal.getProposalWaitTime());
+		options.setTransientData(proposal.getTransientData());
+		options.setRequestUser(getUser(proposal.getRequestUser()));
 	}
 	
+	protected void bind(TransactionProposal proposal, TransactionsOptions options) {
+		options.setOptions(proposal.getOptions());
+		options.setOrderers(proposal.getOrderers());
+		options.setTransactionsUser(getUser(proposal.getTransactionsUser()));
+		options.setSend2Peers(proposal.getSend2Peers());
+	}
+	
+	protected void bind(InstantiateProposal proposal, InstantiateOptions options) {
+		options.setEndorsementPolicy(proposal.getEndorsementPolicy());
+		options.setEndorsementPolicyFile(proposal.getEndorsementPolicyFile());
+		options.setEndorsementPolicyInputStream(proposal.getEndorsementPolicyInputStream());
+	}
+	
+	protected User getUser(String user) {
+		if (!StringUtils.isBlank(user)) {
+			Organization org = operations.getOrganization(criteria.getOrg());
+			Assert.notNull(org, "Organization not found!");
+			
+			return org.getUser(user);
+		}
+		
+		return null;
+	}
 	
 	@Override
 	public Class<T> getEntityClass() {
