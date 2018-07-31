@@ -8,6 +8,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InvokeProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.QueryProposal;
 
 
 /**
@@ -25,45 +27,45 @@ import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 public interface ChaincodeRepository<T> extends Repository<T, Object> {
 
 	// invoke
-	ResultSet invoke(String func);
+	ResultSet invoke(InvokeProposal proposal, String func);
 
-	ResultSet invoke(String func, Object... args);
+	ResultSet invoke(InvokeProposal proposal, String func, Object... args);
 
-	ResultSet invoke(String func, LinkedHashMap<String, Object> args);
+	ResultSet invoke(InvokeProposal proposal, String func, LinkedHashMap<String, Object> args);
 
 
 	// invoke async
 
-	CompletableFuture<TransactionEvent> invokeAsync(String func);
+	CompletableFuture<TransactionEvent> invokeAsync(InvokeProposal proposal, String func);
 
-	CompletableFuture<TransactionEvent> invokeAsync(String func, Object... args);
+	CompletableFuture<TransactionEvent> invokeAsync(InvokeProposal proposal, String func, Object... args);
 
-	CompletableFuture<TransactionEvent> invokeAsync(String func, LinkedHashMap<String, Object> args);
+	CompletableFuture<TransactionEvent> invokeAsync(InvokeProposal proposal, String func, LinkedHashMap<String, Object> args);
 
 	// invoke async return event
 
-	TransactionEvent invokeFor(String func);
+	TransactionEvent invokeFor(InvokeProposal proposal, String func);
 
-	TransactionEvent invokeFor(String func, Object... args);
+	TransactionEvent invokeFor(InvokeProposal proposal, String func, Object... args);
 
-	TransactionEvent invokeFor(String func, LinkedHashMap<String, Object> args);
+	TransactionEvent invokeFor(InvokeProposal proposal, String func, LinkedHashMap<String, Object> args);
 
 	
 	// query
-	String query(String func);
+	String query(QueryProposal proposal, String func);
 
-	String query(String func, Object... args);
+	String query(QueryProposal proposal, String func, Object... args);
 
-	String query(String func, LinkedHashMap<String, Object> args);
+	String query(QueryProposal proposal, String func, LinkedHashMap<String, Object> args);
 
 	
 	// query async return event
 
-	ResultSet queryFor(String func);
+	ResultSet queryFor(QueryProposal proposal, String func);
 
-	ResultSet queryFor(String func, Object... args);
+	ResultSet queryFor(QueryProposal proposal, String func, Object... args);
 
-	ResultSet queryFor(String func, LinkedHashMap<String, Object> args);
+	ResultSet queryFor(QueryProposal proposal, String func, LinkedHashMap<String, Object> args);
 
 
 	Class<T> getEntityClass();
