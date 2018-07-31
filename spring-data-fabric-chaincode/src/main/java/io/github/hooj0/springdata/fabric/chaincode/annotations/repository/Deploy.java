@@ -12,7 +12,7 @@ import org.springframework.data.annotation.QueryAnnotation;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
- * <b>function:</b> 部署合约chaincode，包括安装、实例化、升级
+ * 部署合约chaincode，包括安装、实例化、升级
  * @author hoojo
  * @createDate 2018年7月16日 下午5:15:48
  * @file Deploy.java
