@@ -23,12 +23,8 @@ public final class QueryCriteria extends QueryOptions {
 	
 	public QueryCriteria(Criteria criteria) {
 		this.criteria = criteria;
+		
 		this.setChaincodeId(this.criteria.getChaincodeID());
-	}
-	
-	public QueryCriteria setCriteria(Criteria criteria) {
-		this.criteria = criteria;
-		this.setChaincodeId(this.criteria.getChaincodeID());
-		return this;
+		this.setChaincodeType(this.criteria.getType());
 	}
 }
