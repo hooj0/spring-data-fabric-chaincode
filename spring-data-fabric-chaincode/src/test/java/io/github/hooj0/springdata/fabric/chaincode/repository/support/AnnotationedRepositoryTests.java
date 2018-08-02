@@ -104,8 +104,8 @@ public class AnnotationedRepositoryTests {
 	
 	@Test
 	public void testInvoke() {
-		System.out.println(myRepo.invoke("move", "2", "3"));
-		System.out.println(myRepo.query("2223333"));
+		//System.out.println(myRepo.invoke("move", "2", "3"));
+		//System.out.println(myRepo.query("2223333"));
 		//goRepo.installChaincode("src/gochaincode");
 		//nodeRepo.installChaincode("src/gochaincode22222");
 	}
