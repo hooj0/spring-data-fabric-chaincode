@@ -12,7 +12,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 /**
- * <b>function:</b>
+ * based abstract chaincode converter support
  * @author hoojo
  * @createDate 2018年7月17日 下午5:24:27
  * @file AbstractChaincodeConverter.java
@@ -84,14 +84,9 @@ public abstract class AbstractChaincodeConverter implements ChaincodeConverter, 
 			conversionService.addConverter(BigIntegerToObjectIdConverter.INSTANCE);
 		}
 		*/
-
+		
 		if (conversionService instanceof GenericConversionService) {
 			getCustomConversions().registerConvertersIn((GenericConversionService) conversionService);
 		}
-	}
-	
-	@Override
-	public Object getJSONMapper() {
-		return new Object();
 	}
 }
