@@ -1,29 +1,29 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
+import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.User;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.RepositoryQuery;
-import org.springframework.data.repository.query.ResultProcessor;
+import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import com.google.common.collect.Maps;
+import com.google.common.reflect.TypeToken;
 
+import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.fabric.sdk.commons.domain.Organization;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instantiate;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Upgrade;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.DateTimeConverters;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
@@ -33,6 +33,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.query.InstantiateCriteri
 import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.UpgradeCriteria;
+import io.github.hooj0.springdata.fabric.chaincode.core.serialize.ChaincodeEntitySerialization;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,9 +51,12 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 
 	protected final GenericConversionService conversionService = new GenericConversionService();
+	
 	protected final MappingContext<? extends ChaincodePersistentEntity<?>, ChaincodePersistentProperty> mappingContext;
+	protected final ChaincodeEntitySerialization serialization;
 	protected final ChaincodeOperations operations;
 	protected final ChaincodeQueryMethod method;
+	
 
 	{
 		if (!conversionService.canConvert(java.util.Date.class, String.class)) {
@@ -71,6 +75,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		this.operations = operations;
 		
 		this.mappingContext = operations.getConverter().getMappingContext();
+		this.serialization = operations.getConverter().getChaincodeEntitySerialization();
 	}
 
 	@Override
@@ -78,49 +83,122 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		return method;
 	}
 	
-	protected abstract String[] createQuery(ParametersParameterAccessor parameterAccessor);
+	protected abstract String[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
 	
-	@Override
-	public Object execute(Object[] parameterValues) {
-		
-		if (method.hasProposalAnnotated()) {
-			log.debug("chaincode proposal request: {}, args: {}", method.getName(), parameterValues);
-		}
-		if (method.hasDeployAnnotated()) {
-			log.debug("chaincode deploy request: {}, args: {}", method.getName(), parameterValues);
+	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String chaincodeFile) {
+		criteria.setTransientData(transformTransientData(parameterValues));
+
+		@SuppressWarnings("serial")
+		TypeToken<Collection<ProposalResponse>> typeToken = new TypeToken<Collection<ProposalResponse>>() {};
+		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+			return operations.install(criteria, chaincodeFile);
 		} 
-		System.err.println(method.getChannelAnnotated());
 		
-		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
-		String[] stringQueries = createQuery(accessor);
-		log.info("query stringQueries: {}", new Object[] { stringQueries });
+		return operations.install(criteria, chaincodeFile);
+	} 
+	
+	@SuppressWarnings("serial")
+	protected Object instaantiateOperation(InstantiateCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
+		criteria.setTransientData(transformTransientData(parameterValues));
 		
-		ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
-		Class<?> typeToRead = processor.getReturnedType().getTypeToRead();
+		func = StringUtils.defaultIfBlank(func, method.getName());
 		
-		log.info("query result: {}", typeToRead);
+		/*if (method.hasSerializationAnnotated()) {
+			ResultSet result = operations.instantiate(criteria, func, parameterValues);
+			return method.getSerializationAnnotated().provider().getSerialization().deserialize(returnedType.getReturnedType(), result.getResult());
+		}*/
 		
-		if (method.hasInstallAnnotated()) {
-			
-			return doInstall(parameterValues);
-		} else if (method.hasInstantiateAnnotated()) {
-			
-			return doInstaantiate(parameterValues);
-		} else if (method.hasUpgradeAnnotated()) {
-			
-			return doUpgrade(parameterValues);
-		} else if (method.hasInvokeAnnotated()) {
-			
-			return doInvoke(parameterValues);
-		} else if (method.hasQueryAnnotated()) {
-			
-			return doQuery(parameterValues);
+		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
+		
+		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+			return operations.instantiateAsync(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+			return operations.instantiateFor(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+			return operations.instantiate(criteria, func, parameterValues);
 		}
 		
-		return null;
-	}
+		ResultSet result = operations.instantiate(criteria, func, parameterValues);
+		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
+			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		}
+		
+		return result.getResult();
+	} 
 	
-	protected Map<String, byte[]> transformTransientEntity(Object[] parameterValues) {
+	@SuppressWarnings("serial")
+	protected Object upgradeOperation(UpgradeCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
+		criteria.setTransientData(transformTransientData(parameterValues));
+
+		func = StringUtils.defaultIfBlank(func, method.getName());
+		
+		/*if (method.hasSerializationAnnotated()) {
+			ResultSet result = operations.upgrade(criteria, func, parameterValues);
+			return method.getSerializationAnnotated().provider().getSerialization().deserialize(returnedType.getReturnedType(), result.getResult());
+		}*/
+		
+		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
+		
+		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+			return operations.upgradeAsync(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+			return operations.upgradeFor(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+			return operations.upgrade(criteria, func, parameterValues);
+		}
+		
+		ResultSet result = operations.upgrade(criteria, func, parameterValues);
+		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
+			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		}
+		
+		return result.getResult();
+	} 
+	
+	@SuppressWarnings("serial")
+	protected Object invokeOperation(InvokeCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
+		criteria.setTransientData(transformTransientData(parameterValues));
+
+		func = StringUtils.defaultIfBlank(func, method.getName());
+		
+		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
+		
+		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+			return operations.invokeAsync(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+			return operations.invokeFor(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+			return operations.invoke(criteria, func, parameterValues);
+		}
+		
+		ResultSet result = operations.invoke(criteria, func, parameterValues);
+		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
+			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		}
+		
+		return result.getResult();
+	} 
+	
+	protected Object queryOperation(QueryCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
+		criteria.setTransientData(transformTransientData(parameterValues));
+
+		func = StringUtils.defaultIfBlank(func, method.getName());
+		
+		if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+			return operations.queryFor(criteria, func, parameterValues);
+		} else if (ClassUtils.isAssignable(String.class, returnedType.getReturnedType())) {
+			return operations.query(criteria, func, parameterValues);
+		}
+		
+		String result = operations.query(criteria, func, parameterValues);
+		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
+			return serialization.deserialize(returnedType.getReturnedType(), result);
+		}
+		
+		return result;
+	} 
+	
+	protected Map<String, byte[]> transformTransientData(Object[] parameterValues) {
 		Map<String, byte[]> transientData = Maps.newHashMap();
 		
 		for (Object param : parameterValues) {
@@ -131,7 +209,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 			if (!ClassUtils.isPrimitiveOrWrapper(param.getClass())) {
 				ChaincodePersistentEntity<?> entity = mappingContext.getPersistentEntity(param.getClass());
 				if (entity != null) {
-					transientData.putAll(combinationTransientEntity(entity, param));
+					transientData.putAll(combinationTransientData(entity, param));
 				}
 			}
 		}
@@ -139,7 +217,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		return transientData;
 	}
 	
-	private Map<String, byte[]> combinationTransientEntity(ChaincodePersistentEntity<?> entity, Object param) {
+	private Map<String, byte[]> combinationTransientData(ChaincodePersistentEntity<?> entity, Object param) {
 		Map<String, byte[]> transientData = Maps.newHashMap();
 
 		Map<String, String> mappings = entity.getTransientMappings();
@@ -150,6 +228,13 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		Set<String> keys = mappings.keySet();
 		for (String key : keys) {
 			try {
+				/*
+				Method getter = ReflectionUtils.findMethod(param.getClass(), "get" + StringUtils.capitalize(key));
+				Object value = ReflectionUtils.invokeMethod(getter, param);
+
+				MethodUtils.invokeMethod(param, "get" + StringUtils.capitalize(key));
+				*/
+				
 				String value = BeanUtils.getProperty(param, key);
 				
 				byte[] data = value.getBytes();
@@ -171,122 +256,5 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		}
 		
 		return null;
-	}
-	
-	private Object doInstall(Object[] parameterValues) {
-		Install install = method.getInstallAnnotated();
-		
-		InstallCriteria criteria = new InstallCriteria(method.getCriteria());
-		criteria.setChaincodeUpgradeVersion(install.version());
-		criteria.setClientUserContext(getUser(install.clientUser()));
-		criteria.setProposalWaitTime(install.waitTime());
-		criteria.setRequestUser(getUser(install.requestUser()));
-		criteria.setSpecificPeers(install.specificPeers());
-		
-		criteria.setTransientData(transformTransientEntity(parameterValues));
-
-		return operations.install(criteria, install.chaincodeLocation());
-	} 
-	
-	private Object doInstaantiate(Object[] parameterValues) {
-		Instantiate instantiate = method.getInstantiateAnnotated();
-		
-		InstantiateCriteria criteria = new InstantiateCriteria(method.getCriteria());
-		
-		criteria.setEndorsementPolicyFile(new File(instantiate.endorsementPolicyFile()));
-		
-		criteria.setClientUserContext(getUser(instantiate.clientUser()));
-		criteria.setProposalWaitTime(instantiate.proposalWaitTime());
-		criteria.setRequestUser(getUser(instantiate.requestUser()));
-		criteria.setSpecificPeers(instantiate.specificPeers());
-
-		criteria.setTransactionsUser(getUser(instantiate.transactionsUser()));
-		criteria.setTransactionWaitTime(instantiate.transactionWaitTime());
-		
-		criteria.setTransientData(transformTransientEntity(parameterValues));
-		
-		String func = StringUtils.defaultIfBlank(instantiate.func(), method.getName());
-		
-		Object[] args = parameterValues;
-		if (args != null && args.length != 0) {
-			args = instantiate.args();
-		}
-		
-		return operations.instantiate(criteria, func, parameterValues);
-	} 
-	
-	private Object doUpgrade(Object[] parameterValues) {
-		Upgrade upgrade = method.getUpgradeAnnotated();
-		
-		UpgradeCriteria criteria = new UpgradeCriteria(method.getCriteria());
-		
-		criteria.setEndorsementPolicyFile(new File(upgrade.endorsementPolicyFile()));
-		
-		criteria.setClientUserContext(getUser(upgrade.clientUser()));
-		criteria.setProposalWaitTime(upgrade.proposalWaitTime());
-		criteria.setRequestUser(getUser(upgrade.requestUser()));
-		criteria.setSpecificPeers(upgrade.specificPeers());
-
-		criteria.setTransactionsUser(getUser(upgrade.transactionsUser()));
-		criteria.setTransactionWaitTime(upgrade.transactionWaitTime());
-		
-		criteria.setTransientData(transformTransientEntity(parameterValues));
-
-		String func = StringUtils.defaultIfBlank(upgrade.func(), method.getName());
-		
-		Object[] args = parameterValues;
-		if (args != null && args.length != 0) {
-			args = upgrade.args();
-		}
-		
-		//return operations.upgradeFor(criteria, func, parameterValues);
-		return operations.upgrade(criteria, func, parameterValues);
-	} 
-	
-	private Object doInvoke(Object[] parameterValues) {
-		Invoke invoke = method.getInvokeAnnotated();
-		
-		InvokeCriteria criteria = new InvokeCriteria(method.getCriteria());
-		
-		criteria.setClientUserContext(getUser(invoke.clientUser()));
-		criteria.setProposalWaitTime(invoke.proposalWaitTime());
-		criteria.setRequestUser(getUser(invoke.requestUser()));
-		criteria.setSpecificPeers(invoke.specificPeers());
-
-		criteria.setTransactionsUser(getUser(invoke.transactionsUser()));
-		criteria.setTransactionWaitTime(invoke.transactionWaitTime());
-		
-		criteria.setTransientData(transformTransientEntity(parameterValues));
-
-		String func = StringUtils.defaultIfBlank(invoke.func(), method.getName());
-		
-		Object[] args = parameterValues;
-		if (args != null && args.length != 0) {
-			args = invoke.args();
-		}
-		
-		return operations.invoke(criteria, func, parameterValues);
-	}
-	
-	private Object doQuery(Object[] parameterValues) {
-		Query query = method.getQueryAnnotated();
-		
-		QueryCriteria criteria = new QueryCriteria(method.getCriteria());
-		
-		criteria.setClientUserContext(getUser(query.clientUser()));
-		criteria.setProposalWaitTime(query.waitTime());
-		criteria.setRequestUser(getUser(query.requestUser()));
-		criteria.setSpecificPeers(query.specificPeers());
-
-		criteria.setTransientData(transformTransientEntity(parameterValues));
-
-		String func = StringUtils.defaultIfBlank(query.func(), method.getName());
-		
-		Object[] args = parameterValues;
-		if (args != null && args.length != 0) {
-			args = query.args();
-		}
-		
-		return operations.query(criteria, func, args);
 	}
 }
