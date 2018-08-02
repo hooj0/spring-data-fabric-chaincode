@@ -8,9 +8,11 @@ import org.springframework.data.repository.query.parser.PartTree;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
+import io.github.hooj0.springdata.fabric.chaincode.repository.query.parser.ChaincodeQueryCreator;
 
 /**
  * PartTree 自动派生查询操作
+ * @changelog automatic derived `PartTree` query operation
  * @author hoojo
  * @createDate 2018年7月18日 下午4:24:06
  * @file PartTreeChaincodeQuery.java
@@ -33,9 +35,14 @@ public class PartTreeChaincodeQuery extends AbstractChaincodeQuery {
 	}
 
 	@Override
-	protected String[] createQuery(ParametersParameterAccessor accessor) {
+	protected String[] createQuery(ParametersParameterAccessor accessor, Object[] parameterValues) {
 		
 		List<String> queries = new ChaincodeQueryCreator(tree, accessor, mappingContext, conversionService).createQuery();
 		return (String[]) queries.toArray();
+	}
+
+	@Override
+	public Object execute(Object[] values) {
+		return null;
 	}
 }
