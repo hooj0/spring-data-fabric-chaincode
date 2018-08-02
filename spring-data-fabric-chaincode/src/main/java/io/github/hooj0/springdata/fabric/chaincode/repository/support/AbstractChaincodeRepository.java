@@ -110,6 +110,11 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	}
 	
 	@Override
+	public Criteria getCriteria() {
+		return this.criteria;
+	}
+	
+	@Override
 	public Class<T> getEntityClass() {
 		if (!isEntityClassSet()) {
 			try {
