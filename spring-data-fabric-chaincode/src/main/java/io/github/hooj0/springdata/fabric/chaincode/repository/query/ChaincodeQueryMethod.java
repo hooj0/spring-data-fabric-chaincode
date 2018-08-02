@@ -26,6 +26,8 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instan
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Proposal;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Serialization;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Transaction;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Upgrade;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
@@ -55,7 +57,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	private final Proposal proposalAnnotated;
 	private final Deploy deployAnnotated;
 	
-	private Class[] annotationes = { Install.class, Instantiate.class, Upgrade.class, Invoke.class, Query.class, Channel.class };
+	private Class[] annotationes = { Install.class, Instantiate.class, Upgrade.class, Invoke.class, Query.class, Channel.class, Transaction.class, Serialization.class };
 	private ClassToInstanceMap<Annotation> annotationInstatnces = MutableClassToInstanceMap.<Annotation>create();
 	
 	@SuppressWarnings("unchecked")
@@ -159,6 +161,22 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	
 	public boolean hasChannelAnnotated() {
 		return getChannelAnnotated() != null;
+	}
+	
+	public Transaction getTransactionAnnotated() {
+		return this.getAnnotation(Transaction.class);
+	}
+	
+	public boolean hasTransactionAnnotated() {
+		return getTransactionAnnotated() != null;
+	}
+	
+	public Serialization getSerializationAnnotated() {
+		return this.getAnnotation(Serialization.class);
+	}
+	
+	public boolean hasSerializationAnnotated() {
+		return getSerializationAnnotated() != null;
 	}
 
 	public TypeInformation<?> getReturnType() {
