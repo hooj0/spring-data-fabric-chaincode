@@ -8,6 +8,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InvokeProposal;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.QueryProposal;
 
@@ -69,4 +70,6 @@ public interface ChaincodeRepository<T> extends Repository<T, Object> {
 
 
 	Class<T> getEntityClass();
+	
+	Criteria getCriteria();
 }
