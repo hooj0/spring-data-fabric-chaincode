@@ -45,23 +45,4 @@ public @interface Instantiate {
 	/** HFClient 客户端上下文用户  */
 	@AliasFor(annotation = Proposal.class, attribute = "clientUser")
 	String clientUser() default "";
-	
-	/** 当前请求用户  */
-	@AliasFor(annotation = Proposal.class, attribute = "requestUser")
-	String requestUser() default "";
-	
-	/** 发送给特定的 peer节点 */
-	@AliasFor(annotation = Proposal.class, attribute = "specificPeers")
-	boolean specificPeers() default true;
-	
-	/** 请求提议等待响应时间 */
-	@AliasFor(annotation = Proposal.class, attribute = "waitTime")
-	long proposalWaitTime() default 0;
-	
-	/** 交易等待时间 */
-	@AliasFor(annotation = Transaction.class, attribute = "waitTime")
-	long transactionWaitTime() default 0;
-	/** 发起交易的用户 */
-	@AliasFor(annotation = Transaction.class, attribute = "user")
-	String transactionsUser() default "";
 }
