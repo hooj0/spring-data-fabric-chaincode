@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.repository.query;
+package io.github.hooj0.springdata.fabric.chaincode.repository.query.parser;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersist
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * PartTree Chaincode Query Creator
+ * chaincode repository `PartTree` query creator
  * @author hoojo
  * @createDate 2018年7月18日 下午4:41:24
  * @file ChaincodeQueryCreator.java
