@@ -34,6 +34,8 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepositor
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.PartTreeChaincodeQuery;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.StringBasedChaincodeQuery;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ChaincodeEntityInformationCreator;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ChaincodeEntityInformationCreatorImpl;
 import lombok.extern.slf4j.Slf4j;
 
 /**
