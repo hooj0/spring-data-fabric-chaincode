@@ -11,9 +11,9 @@ import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstallProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstantiateProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.UpgradeProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstallProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstantiateProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.UpgradeProposal;
 
 /**
  * chaincode deploy `install & instantiate & upgrade` repository
