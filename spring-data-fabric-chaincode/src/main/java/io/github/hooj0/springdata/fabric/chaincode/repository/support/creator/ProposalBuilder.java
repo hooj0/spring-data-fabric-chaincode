@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.repository.support;
+package io.github.hooj0.springdata.fabric.chaincode.repository.support.creator;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import lombok.Getter;
  * @author hoojo
  * @createDate 2018年7月31日 上午9:15:55
  * @file ProposalBuilder.java
- * @package io.github.hooj0.springdata.fabric.chaincode.domain
+ * @package io.github.hooj0.springdata.fabric.chaincode.repository.support.creator
  * @project spring-data-fabric-chaincode
  * @blog http://hoojo.cnblogs.com
  * @email hoojo_@126.com
