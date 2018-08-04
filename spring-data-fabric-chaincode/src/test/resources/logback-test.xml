@@ -2,6 +2,7 @@
 <configuration>
 
     <!--
+      @changelog change log pattern highlight
 	  <pattern>
 	      %d{yyyy-MM-dd HH:mm:ss} [%level] - %msg%n
 	      Logger: %logger
@@ -47,13 +48,17 @@
 		<withJansi>true</withJansi> 
 		-->
 		<encoder>
-			<!-- <pattern>%d %5p | %t | %-55logger{55} | %m | %n</pattern> -->
-			<pattern>[%thread] %highlight(%-5level) %boldBlue(%logger{15}) - %highlight(%msg) %n</pattern>
+			<pattern>%highlight(%-5level) | %green(%-50logger{15}) | %-3L | %highlight(%msg) %n</pattern>
+			<!-- <pattern>[%thread] %highlight(%-5level) %boldBlue(%logger{15}) - %highlight(%msg) %n</pattern> -->
 			<!-- <pattern>%highlight(%cn) %red(%d{hh:MM:ss}) %green([%20logger{0}]) - %cyan(%message%n)</pattern> -->
 		</encoder>
 	</appender>
 	
 	<logger name="org.springframework" level="ERROR" />
+	<logger name="org.apache.http" level="ERROR" />
+	<logger name="io.grpc.netty" level="ERROR" />
+	<logger name="io.netty" level="ERROR" />
+	<logger name="org.hyperledger.fabric.sdk" level="ERROR" />
 	<logger name="io.github.hooj0.springdata.fabric.chaincode" level="DEBUG" />
 
 	<root level="DEBUG">
