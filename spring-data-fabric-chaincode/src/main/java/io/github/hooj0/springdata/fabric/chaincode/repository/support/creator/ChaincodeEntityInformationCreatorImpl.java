@@ -1,4 +1,4 @@
-package io.github.hooj0.springdata.fabric.chaincode.repository.support;
+package io.github.hooj0.springdata.fabric.chaincode.repository.support.creator;
 
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.util.Assert;
@@ -6,13 +6,16 @@ import org.springframework.util.Assert;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.ChaincodeEntityInformation;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.MappingChaincodeEntityInformation;
 
 /**
  * 实现 ChaincodeEntityInformationCreator 接口，完成对象实体元数据填充
+ * @changelog Implement ChaincodeEntityInformationCreator interface to complete object entity metadata filling
  * @author hoojo
  * @createDate 2018年7月17日 下午6:55:56
  * @file ChaincodeEntityInformationCreatorImpl.java
- * @package io.github.hooj0.springdata.fabric.chaincode.repository.support
+ * @package io.github.hooj0.springdata.fabric.chaincode.repository.support.creator
  * @project spring-data-fabric-chaincode
  * @blog http://hoojo.cnblogs.com
  * @email hoojo_@126.com
