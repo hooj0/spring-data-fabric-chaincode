@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.sdk.User;
 import org.springframework.util.Assert;
 
+import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.InstantiateOptions;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
@@ -15,9 +16,9 @@ import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstantiateProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.Proposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.TransactionProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstantiateProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.Proposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.TransactionProposal;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,7 +101,7 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	
 	protected User getUser(String user) {
 		if (!StringUtils.isBlank(user)) {
-			Organization org = operations.getOrganization(criteria.getOrg());
+			Organization org = operations.getOrganization(criteria);
 			Assert.notNull(org, "Organization not found!");
 			
 			return org.getUser(user);
@@ -112,6 +113,16 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	@Override
 	public Criteria getCriteria() {
 		return this.criteria;
+	}
+	
+	@Override
+	public Organization getOrganization() {
+		return operations.getOrganization(criteria);
+	}
+	
+	@Override
+	public FabricConfiguration getConfig() {
+		return operations.getConfig(criteria);
 	}
 	
 	@Override
