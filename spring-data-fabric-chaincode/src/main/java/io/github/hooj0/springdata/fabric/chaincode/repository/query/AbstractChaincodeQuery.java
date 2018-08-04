@@ -249,7 +249,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	
 	protected User getUser(String user) {
 		if (!StringUtils.isBlank(user)) {
-			Organization org = operations.getOrganization(method.getCriteria().getOrg());
+			Organization org = operations.getOrganization(method.getCriteria());
 			Assert.notNull(org, "Organization not found!");
 			
 			return org.getUser(user);
