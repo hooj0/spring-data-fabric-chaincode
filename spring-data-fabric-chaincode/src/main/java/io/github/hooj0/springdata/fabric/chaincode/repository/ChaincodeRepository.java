@@ -7,10 +7,12 @@ import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
+import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
+import io.github.hooj0.fabric.sdk.commons.domain.Organization;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InvokeProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.QueryProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InvokeProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.QueryProposal;
 
 
 /**
@@ -67,9 +69,12 @@ public interface ChaincodeRepository<T> extends Repository<T, Object> {
 	ResultSet queryFor(QueryProposal proposal, String func, Object... args);
 
 	ResultSet queryFor(QueryProposal proposal, String func, LinkedHashMap<String, Object> args);
-
-
+	
 	Class<T> getEntityClass();
 	
 	Criteria getCriteria();
+
+	Organization getOrganization();
+
+	FabricConfiguration getConfig();
 }
