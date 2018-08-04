@@ -17,11 +17,11 @@ import io.github.hooj0.springdata.fabric.chaincode.core.query.InstantiateCriteri
 import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.UpgradeCriteria;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstallProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InstantiateProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.InvokeProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.QueryProposal;
-import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBuilder.UpgradeProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstallProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstantiateProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InvokeProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.QueryProposal;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.UpgradeProposal;
 
 /**
  * Chaincode Repository Simple Implements
@@ -36,8 +36,8 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.support.ProposalBu
  */
 public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T> {
 
-	public SimpleChaincodeRepository(Criteria globalCriteria, ChaincodeEntityInformation<T, ?> metadata, ChaincodeOperations operations) {
-		super(globalCriteria, metadata, operations);
+	public SimpleChaincodeRepository(Criteria criteria, ChaincodeEntityInformation<T, ?> metadata, ChaincodeOperations operations) {
+		super(criteria, metadata, operations);
 	}
 	
 	public SimpleChaincodeRepository(ChaincodeOperations operations) {
