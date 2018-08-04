@@ -24,7 +24,6 @@ import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincode
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
-import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
 
 /**
@@ -90,7 +89,15 @@ public abstract class AbstractChaincodeTemplate implements ChaincodeOperations, 
 		return this.converter;
 	}
 	
+	private void checkCriteria(Criteria criteria) {
+		Assert.notNull(criteria, "criteria not null!");
+		Assert.hasText(criteria.getChannel(), "criteria 'channel' property not null!");
+		Assert.hasText(criteria.getOrg(), "criteria 'org' property not null!");
+	}
+	
 	protected ChaincodeTransactionOperations createTransactionOperations(Criteria criteria) {
+		checkCriteria(criteria);
+		
 		if (this.beanCache.containsTransactionOperations(criteria)) {
 			return this.beanCache.getTransactionOperationCache(criteria);
 		}
@@ -101,6 +108,8 @@ public abstract class AbstractChaincodeTemplate implements ChaincodeOperations, 
 	}
 	
 	protected ChaincodeDeployOperations createDeployOperations(Criteria criteria) {
+		checkCriteria(criteria);
+		
 		if (this.beanCache.containsTransactionOperations(criteria)) {
 			return this.beanCache.getDeployOperationCache(criteria);
 		}
@@ -112,40 +121,39 @@ public abstract class AbstractChaincodeTemplate implements ChaincodeOperations, 
 	
 	@Override
 	public ChaincodeDeployOperations getChaincodeDeployOperations(Criteria criteria) {
-		return this.beanCache.getDeployOperationCache(criteria);
+		if (this.beanCache.containsDeployOperations(criteria)) {
+			return this.beanCache.getDeployOperationCache(criteria);
+		}
+		
+		return createDeployOperations(criteria);
 	}
 
 	@Override
 	public ChaincodeTransactionOperations getChaincodeTransactionOperations(Criteria criteria) {
-		return this.beanCache.getTransactionOperationCache(criteria);
+		if (this.beanCache.containsTransactionOperations(criteria)) {
+			return this.beanCache.getTransactionOperationCache(criteria);
+		}
+		
+		return createTransactionOperations(criteria);
 	}
 	
-	public FabricConfiguration getConfig() {
-		return config;
+	public FabricConfiguration getConfig(Criteria criteria) {
+		return this.getChaincodeDeployOperations(criteria).getConfig();
 	}
 
-	public FabricKeyValueStore getStore() {
-		return store;
-	}
-	
 	public Organization getOrganization(Criteria criteria) {
 		Assert.hasText(criteria.getOrg(), "criteria.org property is empty!");
 		
-		return config.getOrganization(criteria.getOrg());
+		return getConfig(criteria).getOrganization(criteria.getOrg());
 	}
 	
-	public Organization getOrganization(String org) {
-		Assert.hasText(org, "org property is empty!");
-		
-		return config.getOrganization(org);
-	}
-	
+	@SuppressWarnings("unused")
 	protected <T extends Options> void afterCriteriaSet(T target) {
 		Assert.notNull(target, "parameter is null!");
 		
 		if (target instanceof QueryCriteria) {
-			InvokeCriteria criteria = (InvokeCriteria) target;
-			System.out.println("criteria --> " + criteria);
+			QueryCriteria criteria = (QueryCriteria) target;
+			//System.out.println("criteria --> " + criteria);
 		}
 	}
 }
