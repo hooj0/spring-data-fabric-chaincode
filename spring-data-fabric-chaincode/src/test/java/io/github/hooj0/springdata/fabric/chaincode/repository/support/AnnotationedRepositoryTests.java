@@ -2,7 +2,9 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 
 import org.hyperledger.fabric.sdk.TransactionRequest.Type;
 import org.junit.Assert;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -62,7 +65,6 @@ public class AnnotationedRepositoryTests {
 		considerNestedRepositories = true, 
 		includeFilters = @Filter(pattern = ".*Repo", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
-		/*
 		@Override
 		protected Set<Class<?>> getInitialEntitySet() {
 			return Collections.singleton(Person.class);
@@ -71,7 +73,7 @@ public class AnnotationedRepositoryTests {
 		@Bean
 		CaptureEventListener eventListener() {
 			return new CaptureEventListener();
-		}*/
+		}
 	}
 	
 	@Autowired @Qualifier("goRepo")
