@@ -61,24 +61,24 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	
 	protected void afterCriteriaSet(Proposal proposal, Options options) {
 
-		bind(proposal, options);
+		afterOptionSet(proposal, options);
 		
 		if (proposal instanceof TransactionProposal && options instanceof TransactionsOptions) {
 			TransactionProposal transactionProposal = (TransactionProposal) proposal;
 			TransactionsOptions transactionsOptions = (TransactionsOptions) options;
 
-			bind(transactionProposal, transactionsOptions);
+			afterTransactionSet(transactionProposal, transactionsOptions);
 		}
 		
 		if (proposal instanceof InstantiateProposal && options instanceof InstantiateOptions) {
 			InstantiateProposal instantiateProposal = (InstantiateProposal) proposal;
 			InstantiateOptions instantiateOptions = (InstantiateOptions) options;
 
-			bind(instantiateProposal, instantiateOptions);
+			afterInstantiateSet(instantiateProposal, instantiateOptions);
 		}
 	}
 	
-	protected void bind(Proposal proposal, Options options) {
+	protected void afterOptionSet(Proposal proposal, Options options) {
 		options.setSpecificPeers(proposal.isSpecificPeers());
 		options.setClientUserContext(getUser(proposal.getClientUser()));
 		options.setProposalWaitTime(proposal.getProposalWaitTime());
@@ -86,14 +86,14 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 		options.setRequestUser(getUser(proposal.getRequestUser()));
 	}
 	
-	protected void bind(TransactionProposal proposal, TransactionsOptions options) {
+	protected void afterTransactionSet(TransactionProposal proposal, TransactionsOptions options) {
 		options.setOptions(proposal.getOptions());
 		options.setOrderers(proposal.getOrderers());
 		options.setTransactionsUser(getUser(proposal.getTransactionsUser()));
 		options.setSend2Peers(proposal.getSend2Peers());
 	}
 	
-	protected void bind(InstantiateProposal proposal, InstantiateOptions options) {
+	protected void afterInstantiateSet(InstantiateProposal proposal, InstantiateOptions options) {
 		options.setEndorsementPolicy(proposal.getEndorsementPolicy());
 		options.setEndorsementPolicyFile(proposal.getEndorsementPolicyFile());
 		options.setEndorsementPolicyInputStream(proposal.getEndorsementPolicyInputStream());
