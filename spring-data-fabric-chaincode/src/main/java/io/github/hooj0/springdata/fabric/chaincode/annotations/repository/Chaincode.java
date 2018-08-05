@@ -11,8 +11,7 @@ import org.hyperledger.fabric.sdk.TransactionRequest.Type;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * chaincode 智能合约实体注解
- * 
+ * chaincode repository annotation
  * @author hoojo
  * @createDate 2018年7月16日 下午5:01:01
  * @file Chaincode.java
