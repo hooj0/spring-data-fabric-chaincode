@@ -47,8 +47,8 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 
 	private static final String QUERY_ARGS_SEPARATOR = "_;_";
 
-	private final StringBasedQueryBinder binder;
 	private final StringBasedQueryParser parser;
+	private StringBasedQueryBinder binder;
 	private String query;
 	
 	public StringBasedChaincodeQuery(ChaincodeQueryMethod method, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
@@ -60,46 +60,44 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		this.query = namedQuery;
 		
 		this.parser = new StringBasedQueryParser(conversionService);
-		this.binder = new StringBasedQueryBinder(query, new ExpressionEvaluatingParameterBinder(expressionParser, evaluationContextProvider));
+		if (StringUtils.isNotBlank(query)) {
+			this.binder = new StringBasedQueryBinder(query, new ExpressionEvaluatingParameterBinder(expressionParser, evaluationContextProvider));
+		} 
 	}
 
 	@Override
-	protected String[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues) {
-		log.info("args string: {}", query);
+	protected Object[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues) {
 
+		if (hasSerializeParameter()) {
+			parameterValues = serializeParameter(parameterValues);
+		} 
+		
 		if (StringUtils.isNotBlank(query)) {
+			log.debug("args string: {}", query);
+
 			SimpleStatement statement = binder.bindQuery(parameterAccessor, method, parameterValues);
+			log.debug("binder query statement: {}, args: {}", statement.getBindableStatement(), statement.getArray());
 			
 			String result = parser.replacePlaceholders(statement.getBindableStatement(), statement.getArray());
+			log.debug("parser args: {}", new Object[] { result });
 			
-			log.info("args result: {}", new Object[] { result });
 			return StringUtils.split(result, QUERY_ARGS_SEPARATOR);
 		}
 		
-		return null;
+		return parameterValues;
 	}
 	
 	@Override
 	public Object execute(Object[] parameterValues) {
 		
-		if (method.hasProposalAnnotated()) {
-			log.debug("chaincode proposal request: {}, args: {}", method.getName(), parameterValues);
-		}
-		if (method.hasDeployAnnotated()) {
-			log.debug("chaincode deploy request: {}, args: {}", method.getName(), parameterValues);
-		} 
-		System.err.println(method.getChannelAnnotated());
-		
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
 		
 		Object[] params = createQuery(accessor, parameterValues);
-		log.info("query stringQueries: {}", new Object[] { params });
+		log.info("query string params: {}", new Object[] { params });
 
 		params = Optional.fromNullable(params).or(parameterValues);
 		
 		ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
-		Class<?> typeToRead = processor.getReturnedType().getTypeToRead();
-		log.info("query result: {}", typeToRead);
 		
 		if (method.hasInstallAnnotated()) {
 			
@@ -159,7 +157,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			criteria.setTransactionWaitTime(transaction.waitTime());
 		}
 		
-		return instaantiateOperation(criteria, parameterValues, returnedType, instantiate.func());
+		return instantiateOperation(criteria, parameterValues, returnedType, instantiate.func());
 	} 
 	
 	private Object doUpgrade(Object[] parameterValues, ReturnedType returnedType) {
