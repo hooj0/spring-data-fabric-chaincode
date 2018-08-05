@@ -30,7 +30,6 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersist
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria.CriteriaBuilder;
-import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.PartTreeChaincodeQuery;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.StringBasedChaincodeQuery;
@@ -39,7 +38,7 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.Ch
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 通过 ChaincodeRepositoryFactory 创建 {@link ChaincodeRepository} 实例
+ * Create a {@linkChacodeRepository} instance with ChaincodeRepositoryFactory
  * @author hoojo
  * @createDate 2018年7月17日 下午6:39:01
  * @file ChaincodeRepositoryFactory.java
@@ -59,7 +58,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	private final Criteria criteria;
 	
 	public ChaincodeRepositoryFactory(Class<?> repositoryInterface, ChaincodeOperations operations) {
-		log.debug("Creating chaincode bean factory.");
+		log.debug("Creating chaincode bean factory. target repository interface '{}'", repositoryInterface);
 		
 		Assert.notNull(operations, "ChaincodeOperations must not be null!");
 		Assert.notNull(repositoryInterface, "repositoryInterface must not be null!");
@@ -68,8 +67,6 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
 		
 		this.criteria = bindCriteria(repositoryInterface);
-		
-		System.err.println(criteria);
 	}
 	
 	private Criteria bindCriteria(Class<?> repositoryInterface) {
@@ -82,11 +79,9 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 
 		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
 		if (chaincode != null) {
-			if (StringUtils.isNotBlank(chaincode.org())) {
-				builder.org(chaincode.org());
-			} 
 
 			builder.channel(StringUtils.defaultIfBlank(chaincode.channel(), channel.name()));
+			builder.org(StringUtils.defaultIfBlank(chaincode.org(), channel.org()));
 			builder.name(chaincode.name()).path(chaincode.path()).type(chaincode.type()).version(chaincode.version());
 		}
 		
@@ -95,6 +90,10 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	
 	@Override
 	public <T, ID> ChaincodeEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
+		
+		if (domainClass.isAssignableFrom(Object.class)) {
+			return null;
+		}
 		return entityInformationCreator.getEntityInformation(domainClass);
 	}
 
@@ -187,7 +186,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 			if (namedQueries.hasQuery(namedQueryName)) {
 				String namedQuery = namedQueries.getQuery(namedQueryName);
 				return new StringBasedChaincodeQuery(namedQuery, queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
-			} else if (!queryMethod.hasDeployAnnotated()) {
+			} else if (queryMethod.hasProposalAnnotated()) {
 				return new StringBasedChaincodeQuery(queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
 			} else {
 				return new PartTreeChaincodeQuery(queryMethod, operations);
