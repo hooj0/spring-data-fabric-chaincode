@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 import org.springframework.data.annotation.QueryAnnotation;
 
 /**
- * Chaincode智能合约 交易请求
+ * chaincode smart contract transaction request
  * @author hoojo
  * @createDate 2018年7月16日 下午5:18:14
  * @file Transaction.java
