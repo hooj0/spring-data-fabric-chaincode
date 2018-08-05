@@ -12,7 +12,7 @@ import org.springframework.data.annotation.QueryAnnotation;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
- * <b>function:</b> 实例化智能合约 Chaincode
+ * Chaincode instantiate proposal annotation 
  * @author hoojo
  * @createDate 2018年7月16日 下午5:16:59
  * @file Instantiate.java
@@ -33,6 +33,7 @@ public @interface Instantiate {
 	String value() default "";
 	
 	/** 执行Chaincode智能合约的方法名称，默认为当前注解方法的名称 */
+	@AliasFor(annotation = Proposal.class, attribute = "func")
 	String func() default "";
 	
 	/** 执行Chaincode智能合约的参数，支持占位符或spel表达式 */
