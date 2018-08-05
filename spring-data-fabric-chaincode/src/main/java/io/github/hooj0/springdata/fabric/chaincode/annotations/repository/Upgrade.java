@@ -33,6 +33,7 @@ public @interface Upgrade {
 	String value() default "";
 	
 	/** 执行Chaincode智能合约的方法名称，默认为当前注解方法的名称 */
+	@AliasFor(annotation = Proposal.class, attribute = "func")
 	String func() default "";
 	
 	/** 执行Chaincode智能合约的参数，支持占位符或spel表达式，默认取参数列表  */
