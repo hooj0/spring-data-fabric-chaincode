@@ -66,10 +66,10 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		this.operations = operations;
 		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
 		
-		this.criteria = bindCriteria(repositoryInterface);
+		this.criteria = buildCriteria(repositoryInterface);
 	}
 	
-	private Criteria bindCriteria(Class<?> repositoryInterface) {
+	private Criteria buildCriteria(Class<?> repositoryInterface) {
 		CriteriaBuilder builder = CriteriaBuilder.newBuilder();
 		
 		Channel channel = AnnotatedElementUtils.findMergedAnnotation(repositoryInterface, Channel.class);
