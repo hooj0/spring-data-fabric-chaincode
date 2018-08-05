@@ -11,11 +11,13 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import com.google.common.base.Optional;
 
+import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instantiate;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Proposal;
-import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Transaction;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Upgrade;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
@@ -48,6 +50,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 	private static final String QUERY_ARGS_SEPARATOR = "_;_";
 
 	private final StringBasedQueryParser parser;
+	private final FabricConfiguration config;
 	private StringBasedQueryBinder binder;
 	private String query;
 	
@@ -57,6 +60,8 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 
 	public StringBasedChaincodeQuery(String namedQuery, ChaincodeQueryMethod queryMethod, ChaincodeOperations operations, SpelExpressionParser expressionParser, QueryMethodEvaluationContextProvider evaluationContextProvider) {
 		super(queryMethod, operations);
+		
+		this.config = operations.getConfig(method.getCriteria());
 		this.query = namedQuery;
 		
 		this.parser = new StringBasedQueryParser(conversionService);
@@ -91,134 +96,133 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 	public Object execute(Object[] parameterValues) {
 		
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
-		
-		Object[] params = createQuery(accessor, parameterValues);
-		log.info("query string params: {}", new Object[] { params });
-
-		params = Optional.fromNullable(params).or(parameterValues);
-		
 		ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
 		
+		Object[] params = createQuery(accessor, parameterValues);
+		params = Optional.fromNullable(params).or(parameterValues);
+		
+		log.info("query string params: {}", new Object[] { params });
+		
+		ChaincodeExecutor executor = new ChaincodeExecutor(params, processor.getReturnedType());
+		
 		if (method.hasInstallAnnotated()) {
-			
-			return doInstall(params, processor.getReturnedType());
+			return executor.executeInstall();
 		} else if (method.hasInstantiateAnnotated()) {
-			
-			return doInstaantiate(params, processor.getReturnedType());
-		} else if (method.hasUpgradeAnnotated()) {
-			
-			return doUpgrade(params, processor.getReturnedType());
+			return executor.executeInstaantiate();
 		} else if (method.hasInvokeAnnotated()) {
-			
-			return doInvoke(params, processor.getReturnedType());
+			return executor.executeInvoke();
 		} else if (method.hasQueryAnnotated()) {
+			return executor.executeQuery();
+		} else if (method.hasUpgradeAnnotated()) {
+			return executor.executeUpgrade();
+		} 
+		
+		throw new ChaincodeUnsupportedOperationException("Unknow Support has not @Annotation implemented yet.");
+	}
+	
+	private class ChaincodeExecutor {
+		private Object[] parameterValues;
+		private ReturnedType returnedType;
+		
+		public ChaincodeExecutor(Object[] parameterValues, ReturnedType returnedType) {
+			this.parameterValues = parameterValues;
+			this.returnedType = returnedType;
+		}
+		
+		protected Object executeInstall() {
+			Install install = method.getInstallAnnotated();
+			InstallCriteria criteria = new InstallCriteria(method.getCriteria());
 			
-			return doQuery(params, processor.getReturnedType());
-		}
-		
-		return null;
-	}
-	
-	private Object doInstall(Object[] parameterValues, ReturnedType returnedType) {
-		Install install = method.getInstallAnnotated();
-		
-		InstallCriteria criteria = new InstallCriteria(method.getCriteria());
-		criteria.setChaincodeUpgradeVersion(install.version());
-		
-		Proposal proposal = method.getProposalAnnotated();
-		if (proposal != null) {
-			criteria.setClientUserContext(getUser(StringUtils.defaultIfBlank(install.clientUser(), proposal.clientUser())));
-			criteria.setProposalWaitTime(proposal.waitTime());
-			criteria.setRequestUser(getUser(proposal.requestUser()));
-			criteria.setSpecificPeers(proposal.specificPeers());
-		}
+			String chaincodeLocation = null;
+			if (install != null) {
+				criteria.setChaincodeUpgradeVersion(install.version());
+				chaincodeLocation = install.chaincodeLocation();
+			} 
+			
+			Proposal proposal = method.getProposalAnnotated();
+			this.bindCriteria(criteria, proposal);
 
-		return installOperation(criteria, parameterValues, returnedType, install.chaincodeLocation());
-	} 
-	
-	private Object doInstaantiate(Object[] parameterValues, ReturnedType returnedType) {
-		Instantiate instantiate = method.getInstantiateAnnotated();
+			chaincodeLocation = StringUtils.defaultIfBlank(chaincodeLocation, config.getChaincodeRootPath());
+			return installOperation(criteria, parameterValues, returnedType, chaincodeLocation);
+		} 
 		
-		InstantiateCriteria criteria = new InstantiateCriteria(method.getCriteria());
+		private Object executeInstaantiate() {
+			Instantiate instantiate = method.getInstantiateAnnotated();
+			InstantiateCriteria criteria = new InstantiateCriteria(method.getCriteria());
 
-		criteria.setEndorsementPolicyFile(new File(instantiate.endorsementPolicyFile()));
-		
-		Proposal proposal = method.getProposalAnnotated();
-		if (proposal != null) {
-			criteria.setClientUserContext(getUser(StringUtils.defaultIfBlank(instantiate.clientUser(), proposal.clientUser())));
-			criteria.setProposalWaitTime(proposal.waitTime());
-			criteria.setRequestUser(getUser(proposal.requestUser()));
-			criteria.setSpecificPeers(proposal.specificPeers());
-		}
+			String endorsementPolicyFile = null;
+			if (instantiate != null) {
+				endorsementPolicyFile = instantiate.endorsementPolicyFile();
+			}
+			
+			endorsementPolicyFile = StringUtils.defaultIfBlank(endorsementPolicyFile, config.getEndorsementPolicyFilePath());
+			criteria.setEndorsementPolicyFile(new File(endorsementPolicyFile));
+			
+			Proposal proposal = method.getProposalAnnotated();
+			this.bindCriteria(criteria, proposal);
 
-		Transaction transaction = method.getTransactionAnnotated();
-		if (transaction != null) {
-			criteria.setTransactionsUser(getUser(transaction.user()));
-			criteria.setTransactionWaitTime(transaction.waitTime());
-		}
+			Transaction transaction = method.getTransactionAnnotated();
+			this.bindTransaction(criteria, transaction);
+			
+			return instantiateOperation(criteria, parameterValues, returnedType, proposal.func());
+		} 
 		
-		return instantiateOperation(criteria, parameterValues, returnedType, instantiate.func());
-	} 
-	
-	private Object doUpgrade(Object[] parameterValues, ReturnedType returnedType) {
-		Upgrade upgrade = method.getUpgradeAnnotated();
-		
-		UpgradeCriteria criteria = new UpgradeCriteria(method.getCriteria());
-		
-		criteria.setEndorsementPolicyFile(new File(upgrade.endorsementPolicyFile()));
-		
-		Proposal proposal = method.getProposalAnnotated();
-		if (proposal != null) {
-			criteria.setClientUserContext(getUser(StringUtils.defaultIfBlank(upgrade.clientUser(), proposal.clientUser())));
-			criteria.setProposalWaitTime(proposal.waitTime());
-			criteria.setRequestUser(getUser(proposal.requestUser()));
-			criteria.setSpecificPeers(proposal.specificPeers());
-		}
+		private Object executeUpgrade() {
+			Upgrade upgrade = method.getUpgradeAnnotated();
+			UpgradeCriteria criteria = new UpgradeCriteria(method.getCriteria());
+			
+			String endorsementPolicyFile = null;
+			if (upgrade != null) {
+				endorsementPolicyFile = upgrade.endorsementPolicyFile();
+			}
+			
+			endorsementPolicyFile = StringUtils.defaultIfBlank(endorsementPolicyFile, config.getEndorsementPolicyFilePath());
+			criteria.setEndorsementPolicyFile(new File(upgrade.endorsementPolicyFile()));
+			
+			Proposal proposal = method.getProposalAnnotated();
+			this.bindCriteria(criteria, proposal);
 
-		Transaction transaction = method.getTransactionAnnotated();
-		if (transaction != null) {
-			criteria.setTransactionsUser(getUser(transaction.user()));
-			criteria.setTransactionWaitTime(transaction.waitTime());
-		}
+			Transaction transaction = method.getTransactionAnnotated();
+			this.bindTransaction(criteria, transaction);
+			
+			return upgradeOperation(criteria, parameterValues, returnedType, proposal.func());
+		} 
 		
-		return upgradeOperation(criteria, parameterValues, returnedType, upgrade.func());
-	} 
-	
-	private Object doInvoke(Object[] parameterValues, ReturnedType returnedType) {
-		Invoke invoke = method.getInvokeAnnotated();
-		
-		InvokeCriteria criteria = new InvokeCriteria(method.getCriteria());
-		
-		Proposal proposal = method.getProposalAnnotated();
-		if (proposal != null) {
-			criteria.setClientUserContext(getUser(StringUtils.defaultIfBlank(invoke.clientUser(), proposal.clientUser())));
-			criteria.setProposalWaitTime(proposal.waitTime());
-			criteria.setRequestUser(getUser(proposal.requestUser()));
-			criteria.setSpecificPeers(proposal.specificPeers());
-		}
+		private Object executeInvoke() {
+			InvokeCriteria criteria = new InvokeCriteria(method.getCriteria());
+			
+			Proposal proposal = method.getProposalAnnotated();
+			this.bindCriteria(criteria, proposal);
 
-		Transaction transaction = method.getTransactionAnnotated();
-		if (transaction != null) {
-			criteria.setTransactionsUser(getUser(transaction.user()));
-			criteria.setTransactionWaitTime(transaction.waitTime());
+			Transaction transaction = method.getTransactionAnnotated();
+			this.bindTransaction(criteria, transaction);
+			
+			return invokeOperation(criteria, parameterValues, returnedType, proposal.func());
 		}
 		
-		return invokeOperation(criteria, parameterValues, returnedType, invoke.func());
-	}
-	
-	private Object doQuery(Object[] parameterValues, ReturnedType returnedType) {
-		Query query = method.getQueryAnnotated();
-		
-		QueryCriteria criteria = new QueryCriteria(method.getCriteria());
-		
-		Proposal proposal = method.getProposalAnnotated();
-		if (proposal != null) {
-			criteria.setClientUserContext(getUser(StringUtils.defaultIfBlank(query.clientUser(), proposal.clientUser())));
-			criteria.setProposalWaitTime(proposal.waitTime());
-			criteria.setRequestUser(getUser(proposal.requestUser()));
-			criteria.setSpecificPeers(proposal.specificPeers());
-		}
+		private Object executeQuery() {
+			QueryCriteria criteria = new QueryCriteria(method.getCriteria());
+			
+			Proposal proposal = method.getProposalAnnotated();
+			this.bindCriteria(criteria, proposal);
 
-		return queryOperation(criteria, parameterValues, returnedType, query.func());
+			return queryOperation(criteria, parameterValues, returnedType, proposal.func());
+		}
+		
+		private void bindTransaction(TransactionsOptions options, Transaction transaction) {
+			if (transaction != null) {
+				options.setTransactionsUser(getUser(transaction.user()));
+				options.setTransactionWaitTime(transaction.waitTime());
+			}
+		}
+		
+		private void bindCriteria(Options options, Proposal proposal) {
+			if (proposal != null) {
+				options.setClientUserContext(getUser(proposal.clientUser()));
+				options.setProposalWaitTime(proposal.waitTime());
+				options.setRequestUser(getUser(proposal.requestUser()));
+				options.setSpecificPeers(proposal.specificPeers());
+			}
+		}
 	}
 }
