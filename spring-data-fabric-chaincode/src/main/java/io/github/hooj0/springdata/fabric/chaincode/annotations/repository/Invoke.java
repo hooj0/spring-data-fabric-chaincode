@@ -12,7 +12,7 @@ import org.springframework.data.annotation.QueryAnnotation;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
- * 交易类型智能合约请求
+ * chaincode invoke proposal request annotation
  * @author hoojo
  * @createDate 2018年7月16日 下午5:15:09
  * @file Invoke.java
