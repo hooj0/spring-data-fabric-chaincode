@@ -12,7 +12,7 @@ import org.springframework.data.annotation.QueryAnnotation;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 
 /**
- * 部署合约chaincode，包括安装、实例化、升级
+ * Deploy contract chaincode, including installation, instantiation, and upgrade
  * @author hoojo
  * @createDate 2018年7月16日 下午5:15:48
  * @file Deploy.java
@@ -22,7 +22,7 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
  * @email hoojo_@126.com
  * @version 1.0
  */
-@Proposal
+@Proposal(type = ProposalType.INSTALL)
 @QueryAnnotation
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.PACKAGE, ElementType.METHOD })
