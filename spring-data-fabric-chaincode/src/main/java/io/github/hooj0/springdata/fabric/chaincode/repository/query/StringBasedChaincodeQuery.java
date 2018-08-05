@@ -140,7 +140,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			} 
 			
 			Proposal proposal = method.getProposalAnnotated();
-			this.bindCriteria(criteria, proposal);
+			this.afterCriteriaSet(criteria, proposal);
 
 			chaincodeLocation = StringUtils.defaultIfBlank(chaincodeLocation, config.getChaincodeRootPath());
 			return installOperation(criteria, parameterValues, returnedType, chaincodeLocation);
@@ -159,10 +159,10 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			criteria.setEndorsementPolicyFile(new File(endorsementPolicyFile));
 			
 			Proposal proposal = method.getProposalAnnotated();
-			this.bindCriteria(criteria, proposal);
+			this.afterCriteriaSet(criteria, proposal);
 
 			Transaction transaction = method.getTransactionAnnotated();
-			this.bindTransaction(criteria, transaction);
+			this.afterTransactionSet(criteria, transaction);
 			
 			return instantiateOperation(criteria, parameterValues, returnedType, proposal.func());
 		} 
@@ -180,10 +180,10 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			criteria.setEndorsementPolicyFile(new File(upgrade.endorsementPolicyFile()));
 			
 			Proposal proposal = method.getProposalAnnotated();
-			this.bindCriteria(criteria, proposal);
+			this.afterCriteriaSet(criteria, proposal);
 
 			Transaction transaction = method.getTransactionAnnotated();
-			this.bindTransaction(criteria, transaction);
+			this.afterTransactionSet(criteria, transaction);
 			
 			return upgradeOperation(criteria, parameterValues, returnedType, proposal.func());
 		} 
@@ -192,10 +192,10 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			InvokeCriteria criteria = new InvokeCriteria(method.getCriteria());
 			
 			Proposal proposal = method.getProposalAnnotated();
-			this.bindCriteria(criteria, proposal);
+			this.afterCriteriaSet(criteria, proposal);
 
 			Transaction transaction = method.getTransactionAnnotated();
-			this.bindTransaction(criteria, transaction);
+			this.afterTransactionSet(criteria, transaction);
 			
 			return invokeOperation(criteria, parameterValues, returnedType, proposal.func());
 		}
@@ -204,19 +204,19 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			QueryCriteria criteria = new QueryCriteria(method.getCriteria());
 			
 			Proposal proposal = method.getProposalAnnotated();
-			this.bindCriteria(criteria, proposal);
+			this.afterCriteriaSet(criteria, proposal);
 
 			return queryOperation(criteria, parameterValues, returnedType, proposal.func());
 		}
 		
-		private void bindTransaction(TransactionsOptions options, Transaction transaction) {
+		private void afterTransactionSet(TransactionsOptions options, Transaction transaction) {
 			if (transaction != null) {
 				options.setTransactionsUser(getUser(transaction.user()));
 				options.setTransactionWaitTime(transaction.waitTime());
 			}
 		}
 		
-		private void bindCriteria(Options options, Proposal proposal) {
+		private void afterCriteriaSet(Options options, Proposal proposal) {
 			if (proposal != null) {
 				options.setClientUserContext(getUser(proposal.clientUser()));
 				options.setProposalWaitTime(proposal.waitTime());
