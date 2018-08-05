@@ -33,6 +33,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Invoke;
+import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Proposal;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Query;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Serialization;
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
@@ -40,6 +41,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
 import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
+import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 import io.github.hooj0.springdata.fabric.chaincode.enums.SerializationMode;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.config.EnableChaincodeRepositories;
@@ -175,6 +177,11 @@ public class AnnotationedRepositoryTests {
 	}
 	
 	@Test
+	public void testProposalQuery() {
+		System.out.println(goRepo.queryProposal());
+	}
+	
+	@Test
 	public void testInstallChaincode() {
 	}
 	
@@ -239,6 +246,9 @@ public class AnnotationedRepositoryTests {
 		Person queryForJSONOPerson(@Param("person") Person p);
 		
 		
+		
+		@Proposal(clientUser = "user1", func = "query", args = "b", type = ProposalType.QUERY)
+		String queryProposal();
 		
 		
 		@Invoke(clientUser = "user1", args = { "a", "b", "?0" })
