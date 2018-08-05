@@ -21,7 +21,8 @@ import org.springframework.data.repository.query.ParametersParameterAccessor;
  */
 public class StringBasedQueryParser {
 
-	private static final Pattern PARAMETER_PLACEHOLDER = Pattern.compile("\\?(\\d+)");
+	private static final Pattern INDEX_PARAMETER_PLACEHOLDER = Pattern.compile("\\?(\\d+)");
+	private static final Pattern SIMPLE_PARAMETER_PLACEHOLDER = Pattern.compile("\\?");
 	private ConversionService conversionService;
 	
 	public StringBasedQueryParser(ConversionService conversionService) {
@@ -29,13 +30,14 @@ public class StringBasedQueryParser {
 	}
 	
 	public String replacePlaceholders(String input, Object[] values) {
-		Matcher matcher = PARAMETER_PLACEHOLDER.matcher(input);
+		Matcher matcher = SIMPLE_PARAMETER_PLACEHOLDER.matcher(input);
 
 		String result = input;
+		int index = 0;
 		while (matcher.find()) {
 			String group = matcher.group();
-			int index = Integer.parseInt(matcher.group(1));
 			result = result.replace(group, getParameterWithIndex(values, index));
+			index ++;
 		}
 
 		return result;
@@ -72,7 +74,7 @@ public class StringBasedQueryParser {
 	
 	// 替换占位符，将其替换为正确的参数
 	public String replacePlaceholders(String input, ParametersParameterAccessor accessor) {
-		Matcher matcher = PARAMETER_PLACEHOLDER.matcher(input);
+		Matcher matcher = INDEX_PARAMETER_PLACEHOLDER.matcher(input);
 
 		String result = input;
 		while (matcher.find()) {
