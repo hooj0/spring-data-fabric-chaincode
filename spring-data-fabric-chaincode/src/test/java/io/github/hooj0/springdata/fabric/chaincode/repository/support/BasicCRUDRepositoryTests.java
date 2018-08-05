@@ -28,7 +28,7 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.config.EnableChain
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder;
 
 /**
- * Chaincode CRUD based operation test units
+ * Chaincode CRUD (deploy & transaction) based operation test units
  * @author hoojo
  * @createDate 2018年7月20日 上午11:34:28
  * @file BasicCRUDRepositoryTests.java
@@ -43,9 +43,9 @@ import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.Pr
 public class BasicCRUDRepositoryTests {
 
 	@Configuration
-	@EnableChaincodeRepositories(basePackageClasses = MyRepository2.class, 
+	@EnableChaincodeRepositories(basePackageClasses = MyDeployChaincodeRepository.class, 
 			considerNestedRepositories = true,
-			includeFilters = @Filter(pattern = ".*MyRepository2", type = FilterType.REGEX))
+			includeFilters = @Filter(pattern = ".*Repository", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
 		@Override
 		protected Set<Class<?>> getInitialEntitySet() {
@@ -57,9 +57,13 @@ public class BasicCRUDRepositoryTests {
 	private ChaincodeOperations operations;
 	
 	@Autowired
-	private MyRepository2 repo;
+	private MyTransactionRepository txRepo;
+	
+	@Autowired
+	private MyDeployChaincodeRepository deployRepo;
 
-	private UpgradeRepository upgradeRepository;
+	@Autowired
+	private UpgradeRepository upgradeRepo;
 
 	@Test
 	public void testInvoke() {
@@ -67,11 +71,7 @@ public class BasicCRUDRepositoryTests {
 		ProposalBuilder.InvokeProposal invokeProposal = ProposalBuilder.invoke();
 		invokeProposal.clientUser("user1");
 		
-		System.out.println(repo.getOrganization());
-		System.out.println(repo.getOrganization().getUser("user1"));
-		System.out.println(operations.getOrganization(repo.getCriteria()).getUser("user1"));
-		
-		System.out.println(repo.invoke(invokeProposal, "move", "a", "b", 5));
+		System.out.println(txRepo.invoke(invokeProposal, "move", "b", "a", 50));
 	}
 	
 	@Test
@@ -80,8 +80,8 @@ public class BasicCRUDRepositoryTests {
 			ProposalBuilder.QueryProposal proposal = ProposalBuilder.query();
 			proposal.clientUser("user1");
 			
-			System.out.println(repo.query(proposal, "query", "a"));
-			System.out.println(repo.query(proposal, "query", "b"));
+			System.out.println(txRepo.query(proposal, "query", "a"));
+			System.out.println(txRepo.query(proposal, "query", "b"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -90,7 +90,7 @@ public class BasicCRUDRepositoryTests {
 	@Test
 	public void testInstall() {
 		
-		repo.install(ProposalBuilder.install(), repo.getConfig().getChaincodeRootPath());
+		deployRepo.install(ProposalBuilder.install(), deployRepo.getConfig().getChaincodeRootPath());
 	}
 	
 	@Test
@@ -100,7 +100,7 @@ public class BasicCRUDRepositoryTests {
 			ProposalBuilder.InstantiateProposal proposal = ProposalBuilder.instantiate();
 			//proposal.endorsementPolicyFile(Paths.get(operations.getConfig().getEndorsementPolicyFilePath()).toFile());
 			
-			ResultSet rs = repo.instantiate(proposal, "init", "a", 500, "b", 300);
+			ResultSet rs = deployRepo.instantiate(proposal, "init", "a", 500, "b", 300);
 			System.out.println(rs);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -110,45 +110,69 @@ public class BasicCRUDRepositoryTests {
 	@Test
 	public void testUpgrade() {
 		try {
-			ChaincodeDeployOperations deployOperations = operations.getChaincodeDeployOperations(repo.getCriteria());
-			if (!deployOperations.checkChaincode(repo.getCriteria().getChaincodeID(), repo.getOrganization())) {
-				throw new AssertionError("chaincode 1 没有安装和实例化");
+			ChaincodeID oldId = deployRepo.getCriteria().getChaincodeID();
+			ChaincodeDeployOperations deployOperations = operations.getChaincodeDeployOperations(deployRepo.getCriteria());
+			if (!deployOperations.checkChaincode(oldId, deployRepo.getOrganization())) {
+				//throw new AssertionError(oldId + " Not installed and instantiated");
 			}
 			
 			ProposalBuilder.InstallProposal installProposal = ProposalBuilder.install().upgradeVersion("11_2");
 			
-			ChaincodeID oldId = repo.getCriteria().getChaincodeID();
-			ChaincodeID newId = ChaincodeID.newBuilder().setName(oldId.getName()).setPath(oldId.getPath()).setVersion(installProposal.getUpgradeVersion()).build();
+			ChaincodeID newId = ChaincodeID.newBuilder().setName(oldId.getName())
+														.setPath(oldId.getPath())
+														.setVersion(installProposal.getUpgradeVersion())
+														.build();
 			
-			if (!deployOperations.checkChaincode(newId, repo.getOrganization())) {
-				throw new AssertionError("chaincode 11 已经安装或实例化");
+			if (deployOperations.checkChaincode(newId, deployRepo.getOrganization())) {
+				//throw new AssertionError(newId + " Already installed or instantiated");
 			}
 			
-			repo.install(installProposal, Paths.get(repo.getConfig().getCommonRootPath(), "gocc/sample_11").toFile());
+			if (deployOperations.checkInstallChaincode(newId)) {
+				System.err.println("Installed：" + newId);
+			} else {
+				deployRepo.install(installProposal, Paths.get(deployRepo.getConfig().getCommonRootPath(), "gocc/sample_11").toFile());
+			}
 			
-			System.out.println(deployOperations.checkInstallChaincode(repo.getCriteria().getChaincodeID()));
+			System.out.println("install ---->>>> " + deployOperations.checkInstallChaincode(newId));
 			
-			ProposalBuilder.UpgradeProposal proposal = ProposalBuilder.upgrade();
-			proposal.endorsementPolicyFile(Paths.get(operations.getConfig(repo.getCriteria()).getEndorsementPolicyFilePath()).toFile());
-			
-			ResultSet rs = upgradeRepository.upgrade(proposal, "init", "a", 900, "b", 800);
-			System.out.println(rs);
+			if (deployOperations.checkInstallChaincode(newId) && !deployOperations.checkInstantiatedChaincode(newId)) {
+				ProposalBuilder.UpgradeProposal proposal = ProposalBuilder.upgrade();
+				proposal.endorsementPolicyFile(Paths.get(operations.getConfig(deployRepo.getCriteria()).getEndorsementPolicyFilePath()).toFile());
+				
+				ResultSet rs = upgradeRepo.upgrade(proposal, "init", "a", 900, "b", 800);
+				System.out.println(rs);
+			} else {
+				System.err.println("Instantiated：" + newId);
+			}
 
-			System.out.println(deployOperations.checkInstantiatedChaincode(newId));
+			System.out.println("instantiated ---->>>> " + deployOperations.checkInstantiatedChaincode(newId));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	interface MyRepository extends ChaincodeRepository<Object> {
+	@Test
+	public void testUPtx() {
+		
+		testQuery();
+		
+		testInvoke(); // double tx
+
+		testQuery();
+	}
+	
+	@Chaincode(name = "example_cc_go", type = Type.GO_LANG, version = "11", path = "github.com/example_cc")
+	@Channel(name = "mychannel", org = "peerOrg1")
+	interface MyTransactionRepository extends ChaincodeRepository<Object> {
 	}
 
 	@Chaincode(name = "example_cc_go", type = Type.GO_LANG, version = "11", path = "github.com/example_cc")
 	@Channel(name = "mychannel", org = "peerOrg1")
-	interface MyRepository2 extends DeployChaincodeRepository<Object> {
+	interface MyDeployChaincodeRepository extends DeployChaincodeRepository<Object> {
 	}
 	
 	@Chaincode(name = "example_cc_go", version = "11_2")
+	@Channel(name = "mychannel", org = "peerOrg1")
 	interface UpgradeRepository extends DeployChaincodeRepository<Object> {
 	}
 }
