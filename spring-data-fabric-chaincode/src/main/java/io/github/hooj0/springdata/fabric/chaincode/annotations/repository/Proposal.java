@@ -30,12 +30,15 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
 @QueryAnnotation
 public @interface Proposal {
 
+	ProposalType type();
+
 	String value() default "";
+	
+	/** 执行Chaincode智能合约的方法名称，默认为当前注解方法的名称 */
+	String func() default "";
 	
 	/** 执行Chaincode智能合约的参数，支持占位符或spel表达式，默认取参数列表  */
 	String[] args() default {};
-	
-	ProposalType type() default ProposalType.INVOKE;
 	
 	/** HFClient 客户端上下文用户  */
 	String clientUser() default "";
