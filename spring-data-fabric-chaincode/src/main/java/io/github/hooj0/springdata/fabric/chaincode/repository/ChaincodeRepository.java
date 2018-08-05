@@ -70,6 +70,9 @@ public interface ChaincodeRepository<T> extends Repository<T, Object> {
 
 	ResultSet queryFor(QueryProposal proposal, String func, LinkedHashMap<String, Object> args);
 	
+	
+	
+	
 	Class<T> getEntityClass();
 	
 	Criteria getCriteria();
