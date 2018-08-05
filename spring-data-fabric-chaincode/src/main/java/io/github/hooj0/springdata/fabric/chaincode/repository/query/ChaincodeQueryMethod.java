@@ -111,7 +111,7 @@ public class ChaincodeQueryMethod extends QueryMethod {
 	}
 	
 	public boolean hasInvokeAnnotated() {
-		return getInvokeAnnotated() != null || proposalType == ProposalType.INVOKE;
+		return proposalType == ProposalType.INVOKE || getInvokeAnnotated() != null;
 	}
 	
 	public Query getQueryAnnotated() {
@@ -210,12 +210,6 @@ public class ChaincodeQueryMethod extends QueryMethod {
 		if (this.metadata == null) {
 			Class<?> returnedObjectType = getReturnedObjectType();
 			Class<?> domainClass = getDomainClass();
-			
-			System.out.println("***************************************************");
-			System.out.println("returnedObjectType: " + returnedObjectType);
-			System.out.println("domainClass: " + domainClass);
-			System.out.println("DeclaringClass: " + method.getDeclaringClass());
-			System.out.println("***************************************************");
 			
 			if (ClassUtils.isPrimitiveOrWrapper(returnedObjectType)) {
 				this.metadata = new SimpleChaincodeEntityMetadata<>((Class<Object>) domainClass, this.mappingContext.getRequiredPersistentEntity(domainClass)); 
