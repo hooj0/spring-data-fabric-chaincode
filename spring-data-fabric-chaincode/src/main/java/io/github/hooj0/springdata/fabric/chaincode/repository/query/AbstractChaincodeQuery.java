@@ -1,15 +1,13 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
-import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.User;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.mapping.context.MappingContext;
@@ -34,10 +32,11 @@ import io.github.hooj0.springdata.fabric.chaincode.core.query.InvokeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.QueryCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.UpgradeCriteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.serialize.ChaincodeEntitySerialization;
+import io.github.hooj0.springdata.fabric.chaincode.enums.SerializationMode;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Chaincode 智能合约 查询基础扩展类
+ * Chaincode `invoke & query & instantiate & install & upgrade` abstract support
  * @author hoojo
  * @createDate 2018年7月18日 下午3:12:44
  * @file AbstractChaincodeQuery.java
@@ -83,73 +82,65 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		return method;
 	}
 	
-	protected abstract String[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
+	protected abstract Object[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
 	
 	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String chaincodeFile) {
 		criteria.setTransientData(transformTransientData(parameterValues));
 
-		@SuppressWarnings("serial")
-		TypeToken<Collection<ProposalResponse>> typeToken = new TypeToken<Collection<ProposalResponse>>() {};
-		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
-			return operations.install(criteria, chaincodeFile);
-		} 
-		
 		return operations.install(criteria, chaincodeFile);
 	} 
 	
-	@SuppressWarnings("serial")
-	protected Object instaantiateOperation(InstantiateCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
+	protected Object instantiateOperation(InstantiateCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
 		criteria.setTransientData(transformTransientData(parameterValues));
 		
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
-		/*if (method.hasSerializationAnnotated()) {
-			ResultSet result = operations.instantiate(criteria, func, parameterValues);
-			return method.getSerializationAnnotated().provider().getSerialization().deserialize(returnedType.getReturnedType(), result.getResult());
-		}*/
+		Class<?> resultClass = returnedType.getReturnedType();
 		
-		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
-		
-		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+		if (ClassUtils.isAssignable(CompletableFuture.class, method.getResultType()) && ClassUtils.isAssignable(TransactionEvent.class, resultClass)) {
 			return operations.instantiateAsync(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, resultClass)) {
 			return operations.instantiateFor(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
 			return operations.instantiate(criteria, func, parameterValues);
 		}
 		
 		ResultSet result = operations.instantiate(criteria, func, parameterValues);
-		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
-			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		
+		if (hasDeserializeResult()) {
+			return deserializeResult(resultClass, result.getResult());
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result.getResult();
+		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
+			return serialization.deserialize(resultClass, result.getResult());
 		}
 		
 		return result.getResult();
 	} 
 	
-	@SuppressWarnings("serial")
 	protected Object upgradeOperation(UpgradeCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
 		criteria.setTransientData(transformTransientData(parameterValues));
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
-		/*if (method.hasSerializationAnnotated()) {
-			ResultSet result = operations.upgrade(criteria, func, parameterValues);
-			return method.getSerializationAnnotated().provider().getSerialization().deserialize(returnedType.getReturnedType(), result.getResult());
-		}*/
+		Class<?> resultClass = returnedType.getReturnedType();
 		
-		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
-		
-		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+		if (ClassUtils.isAssignable(CompletableFuture.class, method.getResultType()) && ClassUtils.isAssignable(TransactionEvent.class, resultClass)) {
 			return operations.upgradeAsync(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, resultClass)) {
 			return operations.upgradeFor(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
 			return operations.upgrade(criteria, func, parameterValues);
 		}
 		
 		ResultSet result = operations.upgrade(criteria, func, parameterValues);
-		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
-			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		
+		if (hasDeserializeResult()) {
+			return deserializeResult(resultClass, result.getResult());
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result.getResult();
+		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
+			return serialization.deserialize(resultClass, result.getResult());
 		}
 		
 		return result.getResult();
@@ -161,19 +152,43 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
+		Class<?> resultClass = returnedType.getReturnedType();
 		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
+		/*
+		System.err.println("1->" + method.getReturnType().getActualType());
+		System.err.println("3->" + typeToken.getType());
+		System.err.println("4->" + method.getResultType());
+		System.err.println("5->" + method.getReturnedObjectType());
+		System.err.println("b2->" + method.getReturnType().getActualType().getType());
+		System.err.println("e->" + typeToken.getType().getTypeName());
 		
-		if (ClassUtils.isAssignable(typeToken.getType().getClass(), returnedType.getReturnedType())) {
+		
+		1->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
+		3->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
+		4->class java.util.concurrent.CompletableFuture
+		5->class org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent
+		b2->class java.util.concurrent.CompletableFuture
+		e->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
+		 */
+		
+		boolean isFutrued = StringUtils.equals(typeToken.getType().getTypeName(), method.getReturnType().getActualType().toString());
+		boolean isFutruedEvent = (ClassUtils.isAssignable(CompletableFuture.class, method.getResultType()) && ClassUtils.isAssignable(TransactionEvent.class, resultClass));
+		if (isFutruedEvent || isFutrued) {
 			return operations.invokeAsync(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(TransactionEvent.class, resultClass)) {
 			return operations.invokeFor(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(ResultSet.class, returnedType.getReturnedType())) {
+		} else if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
 			return operations.invoke(criteria, func, parameterValues);
 		}
 		
 		ResultSet result = operations.invoke(criteria, func, parameterValues);
-		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
-			return serialization.deserialize(returnedType.getReturnedType(), result.getResult());
+		
+		if (hasDeserializeResult()) {
+			return deserializeResult(resultClass, result.getResult());
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result.getResult();
+		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
+			return serialization.deserialize(resultClass, result.getResult());
 		}
 		
 		return result.getResult();
@@ -184,19 +199,63 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
-		if (ClassUtils.isAssignable(TransactionEvent.class, returnedType.getReturnedType())) {
+		Class<?> resultClass = returnedType.getReturnedType();
+		
+		if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
 			return operations.queryFor(criteria, func, parameterValues);
-		} else if (ClassUtils.isAssignable(String.class, returnedType.getReturnedType())) {
-			return operations.query(criteria, func, parameterValues);
-		}
+		} 
 		
 		String result = operations.query(criteria, func, parameterValues);
-		if (!ClassUtils.isPrimitiveOrWrapper(returnedType.getReturnedType())) {
-			return serialization.deserialize(returnedType.getReturnedType(), result);
-		}
+		
+		if (hasDeserializeResult()) {
+			return deserializeResult(resultClass, result);
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result;
+		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
+			return serialization.deserialize(resultClass, result);
+		} 
 		
 		return result;
 	} 
+	
+	protected boolean hasSerializeParameter() {
+		
+		if (method.hasSerializationAnnotated()) {
+			SerializationMode mode = method.getSerializationAnnotated().value();
+			if (mode == SerializationMode.ALL || mode == SerializationMode.SERIALIZE) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected boolean hasDeserializeResult() {
+		
+		if (method.hasSerializationAnnotated()) {
+			SerializationMode mode = method.getSerializationAnnotated().value();
+			if (mode == SerializationMode.ALL || mode == SerializationMode.DESERIALIZE) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	protected String[] serializeParameter(Object[] parameterValues) {
+
+		String[] params = new String[parameterValues.length];
+		for (int i = 0; i < parameterValues.length; i++) {
+			params[i] = method.getSerializationAnnotated().provider().getSerialization().serialize(parameterValues[i]);
+		}
+		
+		return params;
+	}
+	
+	protected Object deserializeResult(Class<?> clazz, String result) {
+		
+		return method.getSerializationAnnotated().provider().getSerialization().deserialize(clazz, result);
+	}
 	
 	protected Map<String, byte[]> transformTransientData(Object[] parameterValues) {
 		Map<String, byte[]> transientData = Maps.newHashMap();
@@ -206,7 +265,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 				continue;
 			}
 			
-			if (!ClassUtils.isPrimitiveOrWrapper(param.getClass())) {
+			if (!ClassUtils.isPrimitiveOrWrapper(param.getClass()) && !ClassUtils.isAssignable(param.getClass(), String.class)) {
 				ChaincodePersistentEntity<?> entity = mappingContext.getPersistentEntity(param.getClass());
 				if (entity != null) {
 					transientData.putAll(combinationTransientData(entity, param));
@@ -228,17 +287,20 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		Set<String> keys = mappings.keySet();
 		for (String key : keys) {
 			try {
-				/*
-				Method getter = ReflectionUtils.findMethod(param.getClass(), "get" + StringUtils.capitalize(key));
-				Object value = ReflectionUtils.invokeMethod(getter, param);
-
-				MethodUtils.invokeMethod(param, "get" + StringUtils.capitalize(key));
-				*/
 				
-				String value = BeanUtils.getProperty(param, key);
+				Object parameter = MethodUtils.invokeMethod(param, "get" + StringUtils.capitalize(key));
+				if (parameter == null) {
+					continue;
+				}
 				
-				byte[] data = value.getBytes();
-				transientData.put(mappings.get(key), data);
+				String value = null;
+				if (conversionService.canConvert(parameter.getClass(), String.class)) {
+					value = conversionService.convert(parameter, String.class);
+				} else {
+					value = parameter.toString();
+				}
+				
+				transientData.put(mappings.get(key), value.getBytes());
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				log.error("获取 {} 属性 {} 值异常", param.getClass().getName(), key, e);
 			}
