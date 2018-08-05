@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 操作合约的通道数据信息
+ * Channel data annotation of the operation contract
  * @author hoojo
  * @createDate 2018年7月16日 下午5:17:16
  * @file Channel.java
