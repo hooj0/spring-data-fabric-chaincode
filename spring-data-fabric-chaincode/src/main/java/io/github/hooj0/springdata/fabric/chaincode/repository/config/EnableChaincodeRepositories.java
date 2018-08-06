@@ -18,7 +18,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplat
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.ChaincodeRepositoryFactoryBean;
 
 /**
- * repository 配置中心
+ * chaincode repository enable configuration
  * @author hoojo
  * @createDate 2018年7月18日 下午6:31:21
  * @file EnableChaincodeRepositories.java
