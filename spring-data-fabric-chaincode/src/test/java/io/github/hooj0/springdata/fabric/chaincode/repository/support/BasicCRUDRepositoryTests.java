@@ -20,7 +20,6 @@ import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
-import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.domain.AbstractEntity;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
@@ -52,9 +51,6 @@ public class BasicCRUDRepositoryTests {
 			return Collections.singleton(AbstractEntity.class);
 		}
 	}
-	
-	@Autowired
-	private ChaincodeOperations operations;
 	
 	@Autowired
 	private MyTransactionRepository txRepo;
@@ -98,7 +94,7 @@ public class BasicCRUDRepositoryTests {
 		
 		try {
 			ProposalBuilder.InstantiateProposal proposal = ProposalBuilder.instantiate();
-			//proposal.endorsementPolicyFile(Paths.get(operations.getConfig().getEndorsementPolicyFilePath()).toFile());
+			proposal.endorsementPolicyFile(Paths.get(deployRepo.getConfig().getEndorsementPolicyFilePath()).toFile());
 			
 			ResultSet rs = deployRepo.instantiate(proposal, "init", "a", 500, "b", 300);
 			System.out.println(rs);
@@ -111,7 +107,7 @@ public class BasicCRUDRepositoryTests {
 	public void testUpgrade() {
 		try {
 			ChaincodeID oldId = deployRepo.getCriteria().getChaincodeID();
-			ChaincodeDeployOperations deployOperations = operations.getChaincodeDeployOperations(deployRepo.getCriteria());
+			ChaincodeDeployOperations deployOperations = deployRepo.getChaincodeDeployOperations();
 			if (!deployOperations.checkChaincode(oldId, deployRepo.getOrganization())) {
 				//throw new AssertionError(oldId + " Not installed and instantiated");
 			}
@@ -137,7 +133,7 @@ public class BasicCRUDRepositoryTests {
 			
 			if (deployOperations.checkInstallChaincode(newId) && !deployOperations.checkInstantiatedChaincode(newId)) {
 				ProposalBuilder.UpgradeProposal proposal = ProposalBuilder.upgrade();
-				proposal.endorsementPolicyFile(Paths.get(operations.getConfig(deployRepo.getCriteria()).getEndorsementPolicyFilePath()).toFile());
+				proposal.endorsementPolicyFile(Paths.get(upgradeRepo.getConfig().getEndorsementPolicyFilePath()).toFile());
 				
 				ResultSet rs = upgradeRepo.upgrade(proposal, "init", "a", 900, "b", 800);
 				System.out.println(rs);
