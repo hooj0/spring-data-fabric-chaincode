@@ -1,6 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
@@ -143,7 +144,13 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			this.afterCriteriaSet(criteria, proposal);
 
 			chaincodeLocation = StringUtils.defaultIfBlank(chaincodeLocation, config.getChaincodeRootPath());
-			return installOperation(criteria, parameterValues, returnedType, chaincodeLocation);
+			File chaincodeFile = new File(chaincodeLocation);
+			if (!chaincodeFile.exists()) {
+				chaincodeFile = Paths.get(config.getCommonRootPath(), chaincodeLocation).toFile();
+				log.warn("chaincode source code directory '{}' does not exist, Try to bring the default prefix path: {}", chaincodeLocation, chaincodeFile);
+			} 
+			
+			return installOperation(criteria, parameterValues, returnedType, chaincodeFile);
 		} 
 		
 		private Object executeInstaantiate() {
@@ -154,9 +161,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			if (instantiate != null) {
 				endorsementPolicyFile = instantiate.endorsementPolicyFile();
 			}
-			
-			endorsementPolicyFile = StringUtils.defaultIfBlank(endorsementPolicyFile, config.getEndorsementPolicyFilePath());
-			criteria.setEndorsementPolicyFile(new File(endorsementPolicyFile));
+			criteria.setEndorsementPolicyFile(getPolicyFile(endorsementPolicyFile));
 			
 			Proposal proposal = method.getProposalAnnotated();
 			this.afterCriteriaSet(criteria, proposal);
@@ -177,7 +182,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			}
 			
 			endorsementPolicyFile = StringUtils.defaultIfBlank(endorsementPolicyFile, config.getEndorsementPolicyFilePath());
-			criteria.setEndorsementPolicyFile(new File(upgrade.endorsementPolicyFile()));
+			criteria.setEndorsementPolicyFile(getPolicyFile(endorsementPolicyFile));
 			
 			Proposal proposal = method.getProposalAnnotated();
 			this.afterCriteriaSet(criteria, proposal);
@@ -207,6 +212,17 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			this.afterCriteriaSet(criteria, proposal);
 
 			return queryOperation(criteria, parameterValues, returnedType, proposal.func());
+		}
+		
+		private File getPolicyFile(String endorsementPolicyFile) {
+			endorsementPolicyFile = StringUtils.defaultIfBlank(endorsementPolicyFile, config.getEndorsementPolicyFilePath());
+			File policyFile = new File(endorsementPolicyFile);
+			if (!policyFile.exists()) {
+				policyFile = Paths.get(config.getCommonRootPath(), endorsementPolicyFile).toFile();
+				log.warn("endorsement policy directory '{}' does not exist, Try to bring the default prefix path: {}", endorsementPolicyFile, policyFile);
+			} 
+			
+			return policyFile;
 		}
 		
 		private void afterTransactionSet(TransactionsOptions options, Transaction transaction) {
