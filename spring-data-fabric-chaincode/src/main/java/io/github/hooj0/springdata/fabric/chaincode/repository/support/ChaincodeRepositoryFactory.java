@@ -58,7 +58,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	private final Criteria criteria;
 	
 	public ChaincodeRepositoryFactory(Class<?> repositoryInterface, ChaincodeOperations operations) {
-		log.debug("Creating chaincode bean factory. target repository interface '{}'", repositoryInterface);
+		log.debug("Creating chaincode bean factory. target repository interface '{}'", repositoryInterface.getSimpleName());
 		
 		Assert.notNull(operations, "ChaincodeOperations must not be null!");
 		Assert.notNull(repositoryInterface, "repositoryInterface must not be null!");
@@ -67,6 +67,7 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 		this.entityInformationCreator = new ChaincodeEntityInformationCreatorImpl(this.operations.getConverter().getMappingContext());
 		
 		this.criteria = buildCriteria(repositoryInterface);
+		log.debug("repository interface '{}', criteria: {}", repositoryInterface.getSimpleName(), criteria);
 	}
 	
 	private Criteria buildCriteria(Class<?> repositoryInterface) {
@@ -79,7 +80,6 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 
 		Chaincode chaincode = AnnotationUtils.findAnnotation(repositoryInterface, Chaincode.class);
 		if (chaincode != null) {
-
 			builder.channel(StringUtils.defaultIfBlank(chaincode.channel(), channel.name()));
 			builder.org(StringUtils.defaultIfBlank(chaincode.org(), channel.org()));
 			builder.name(chaincode.name()).path(chaincode.path()).type(chaincode.type()).version(chaincode.version());
@@ -140,8 +140,6 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 	 * @createDate 2018年7月4日 下午4:47:10
 	 */
 	private static boolean isQueryDslRepository(Class<?> repositoryInterface) {
-		log.debug("repositoryInterface: {}", repositoryInterface);
-		
 		return QUERY_DSL_PRESENT && QuerydslPredicateExecutor.class.isAssignableFrom(repositoryInterface);
 	}
 	
