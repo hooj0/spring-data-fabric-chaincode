@@ -8,6 +8,8 @@ import org.hyperledger.fabric.sdk.User;
 import org.springframework.util.Assert;
 
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.InstantiateOptions;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
@@ -23,7 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * ChaincodeRepository Base abstract repository
+ * Chaincode repository base abstract repository
  * @author hoojo
  * @createDate 2018年7月18日 上午9:18:34
  * @file AbstractChaincodeRepositoryQuery.java
@@ -123,6 +125,21 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	@Override
 	public FabricConfiguration getConfig() {
 		return operations.getConfig(criteria);
+	}
+	
+	@Override
+	public ChaincodeDeployOperations getChaincodeDeployOperations() {
+		return operations.getChaincodeDeployOperations(criteria);
+	}
+	
+	@Override
+	public ChaincodeTransactionOperations getChaincodeTransactionOperations() {
+		return operations.getChaincodeTransactionOperations(criteria);
+	}
+	
+	@Override
+	public ChaincodeOperations getChaincodeOperations() {
+		return this.operations;
 	}
 	
 	@Override
