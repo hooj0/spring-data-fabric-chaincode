@@ -1,5 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	
 	protected abstract Object[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
 	
-	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String chaincodeFile) {
+	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, File chaincodeFile) {
 		criteria.setTransientData(transformTransientData(parameterValues));
 
 		return operations.install(criteria, chaincodeFile);
