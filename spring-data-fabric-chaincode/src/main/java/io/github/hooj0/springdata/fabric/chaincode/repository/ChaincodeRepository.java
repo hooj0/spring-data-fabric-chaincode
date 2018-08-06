@@ -8,15 +8,18 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
+import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.fabric.sdk.commons.domain.Organization;
+import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InvokeProposal;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.QueryProposal;
 
 
 /**
- * chaincode 智能合约 repo
+ * chaincode transaction `invoke & query` repository
  * @author hoojo
  * @createDate 2018年7月17日 上午9:34:18
  * @file ChaincodeRepository.java
@@ -80,4 +83,10 @@ public interface ChaincodeRepository<T> extends Repository<T, Object> {
 	Organization getOrganization();
 
 	FabricConfiguration getConfig();
+	
+	ChaincodeOperations getChaincodeOperations();
+	
+	ChaincodeDeployOperations getChaincodeDeployOperations();
+
+	ChaincodeTransactionOperations getChaincodeTransactionOperations();
 }
