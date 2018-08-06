@@ -36,7 +36,7 @@ public class StringBasedQueryParser {
 		int index = 0;
 		while (matcher.find()) {
 			String group = matcher.group();
-			result = result.replace(group, getParameterWithIndex(values, index));
+			result = result.replaceFirst("\\" + group, getParameterWithIndex(values, index));
 			index ++;
 		}
 
