@@ -86,13 +86,11 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	protected abstract Object[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
 	
 	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, File chaincodeFile) {
-		criteria.setTransientData(transformTransientData(parameterValues));
 
 		return operations.install(criteria, chaincodeFile);
 	} 
 	
 	protected Object instantiateOperation(InstantiateCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
-		criteria.setTransientData(transformTransientData(parameterValues));
 		
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
@@ -120,7 +118,6 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	} 
 	
 	protected Object upgradeOperation(UpgradeCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
-		criteria.setTransientData(transformTransientData(parameterValues));
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
@@ -149,7 +146,6 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	
 	@SuppressWarnings("serial")
 	protected Object invokeOperation(InvokeCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
-		criteria.setTransientData(transformTransientData(parameterValues));
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
@@ -196,7 +192,6 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	} 
 	
 	protected Object queryOperation(QueryCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
-		criteria.setTransientData(transformTransientData(parameterValues));
 
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
@@ -273,6 +268,8 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 				}
 			}
 		}
+		
+		log.debug("chaincode transient data: {}", transientData);
 		
 		return transientData;
 	}
