@@ -1,5 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.core.support;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
@@ -198,7 +200,7 @@ public class ChaincodeTemplate extends AbstractChaincodeTemplate {
 		log.debug("chaincode template exec install, criteria: {}", criteria);
 		
 		Assert.notNull(chaincodeSourceFile, "chaincodeSourceFile is null!");
-		Assert.state(chaincodeSourceFile.exists(), "chaincodeSourceFile file is exists");
+		checkArgument(chaincodeSourceFile.exists(), "chaincodeSourceFile file is not exists: %s", chaincodeSourceFile.getAbsolutePath());
 		
 		afterCriteriaSet(criteria);
 
