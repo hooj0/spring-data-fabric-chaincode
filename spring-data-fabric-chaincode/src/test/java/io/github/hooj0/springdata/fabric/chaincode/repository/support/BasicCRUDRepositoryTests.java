@@ -9,6 +9,7 @@ import org.hyperledger.fabric.sdk.TransactionRequest.Type;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -20,6 +21,8 @@ import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Chaincode;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Channel;
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
+import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
+import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.domain.AbstractEntity;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
@@ -46,6 +49,15 @@ public class BasicCRUDRepositoryTests {
 			considerNestedRepositories = true,
 			includeFilters = @Filter(pattern = ".*Repository", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
+		
+		@Autowired
+		private MappingChaincodeConverter mappingConverter;
+		
+		@Bean
+		public ChaincodeTemplate chaincodeTemplate() throws ClassNotFoundException {
+			return new ChaincodeTemplate(mappingConverter);
+		}
+		
 		@Override
 		protected Set<Class<?>> getInitialEntitySet() {
 			return Collections.singleton(AbstractEntity.class);
