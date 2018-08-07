@@ -3,9 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!-- 
+		@changelog releases spring data fabric chaincode v1.0.1
+	-->
+	 
 	<groupId>spring.data.fabric.chaincode</groupId>
 	<artifactId>spring-data-fabric-chaincode-parent</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 
 	<packaging>pom</packaging>
 
@@ -40,7 +44,7 @@
 
 		<!-- Spring -->
 		<spring-framework.version>5.0.2.RELEASE</spring-framework.version>
-		<spring-data.version>2.1.0.BUILD-SNAPSHOT</spring-data.version>
+		<spring-data.version>v2.1.0.BUILD</spring-data.version>
 
 		<cdi.version>1.0</cdi.version>
 		<lombok.version>1.18.0</lombok.version>
@@ -61,7 +65,7 @@
 		<junit.version>4.12</junit.version>
 
 		<!-- Fabric SDKs Commons -->
-		<fabric-sdk-commons.version>1.0-SNAPSHOT</fabric-sdk-commons.version>
+		<fabric-sdk-commons.version>1.0</fabric-sdk-commons.version>
 	</properties>
 
 	<modules>
