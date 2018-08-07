@@ -6,8 +6,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.util.Assert;
 
-import com.google.common.base.Optional;
-
 import io.github.hooj0.fabric.sdk.commons.config.DefaultFabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
@@ -60,8 +58,8 @@ public abstract class AbstractChaincodeTemplate implements ChaincodeOperations, 
 		this.mappingContext = converter.getMappingContext();
 		this.beanCache = new ChaincodeOperationBeanCache();
 		
-		this.config = Optional.fromNullable(config).or(DefaultFabricConfiguration.INSTANCE.getPropertiesConfiguration());
-		this.store = Optional.fromNullable(store).or(this.config.getDefaultKeyValueStore());
+		this.config = config != null ? config : DefaultFabricConfiguration.INSTANCE.getPropertiesConfiguration();
+		this.store = store != null ? store : this.config.getDefaultKeyValueStore();
 		
 		Assert.notNull(this.config, "FabricConfiguration is null.");
 		Assert.notNull(this.store, "FabricKeyValueStore is null.");
