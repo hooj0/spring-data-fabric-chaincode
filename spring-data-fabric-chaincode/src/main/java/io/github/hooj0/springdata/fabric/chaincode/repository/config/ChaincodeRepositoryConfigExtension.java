@@ -1,5 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.config;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,13 +8,11 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
@@ -24,6 +23,9 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
+import io.github.hooj0.fabric.sdk.commons.config.DefaultFabricConfiguration;
+import io.github.hooj0.fabric.sdk.commons.store.FabricKeyValueStore;
+import io.github.hooj0.fabric.sdk.commons.store.support.FileSystemKeyValueStore;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeCustomConversions;
@@ -56,7 +58,7 @@ public class ChaincodeRepositoryConfigExtension extends RepositoryConfigurationE
 		CHAINCODE_OPERATIONS("chaincodeOperations"), 
 		CHAINCODE_TEMPLATE("chaincodeTemplate"), 
 		CHAINCODE_CONVERTER("chaincodeConverter"), 
-		CHAINCODE_CLIENT("chaincodeClient"), 
+		KEY_VALUE_STORE("fabricKeyValueStore"), 
 		CUSTOM_CONVERSIONS("customConversions");
 		
 		String beanName;
@@ -149,7 +151,8 @@ public class ChaincodeRepositoryConfigExtension extends RepositoryConfigurationE
 		registerCustomConversionsIfNotPresent(registry, configurationSource);
 		registerMappingContextIfNotPresent(registry, configurationSource);
 		registerConverterIfNotPresent(registry, configurationSource);
-		registerTemplateIfNotPresent(registry, configurationSource);
+		//registerKeyValueStoreIfNotPresent(registry, configurationSource);
+		//registerTemplateIfNotPresent(registry, configurationSource);
 	}
 	
 	private void registerCustomConversionsIfNotPresent(BeanDefinitionRegistry registry, RepositoryConfigurationSource configurationSource) {
@@ -191,34 +194,41 @@ public class ChaincodeRepositoryConfigExtension extends RepositoryConfigurationE
 
 		registerIfNotAlreadyRegistered(definition, registry, BeanDefinitionName.CHAINCODE_CONVERTER.getBeanName(), definition);
 	}
+	
+	@SuppressWarnings("unused")
+	private void registerKeyValueStoreIfNotPresent(BeanDefinitionRegistry registry, RepositoryConfigurationSource configurationSource) {
+		log.debug("register bean ['{}'] for root repository configuration source to registry", BeanDefinitionName.CHAINCODE_TEMPLATE.beanName);
+		
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(FileSystemKeyValueStore.class);
+		beanDefinition.setTargetType(FabricKeyValueStore.class);
+		
+		//GenericBeanDefinition clientFactory = new GenericBeanDefinition();
+		//clientFactory.setBeanClass(FileSystemKeyValueStore.class);
+		
+		File storeFile =  new File("src/main/resources/fabric-kv-store.properties");
 
+		ConstructorArgumentValues args = new ConstructorArgumentValues();
+		args.addIndexedArgumentValue(0, storeFile);
+		beanDefinition.setConstructorArgumentValues(args);
+		
+		registerIfNotAlreadyRegistered(beanDefinition, registry, BeanDefinitionName.KEY_VALUE_STORE.getBeanName(), beanDefinition);
+	}
+
+	@SuppressWarnings("unused")
 	private void registerTemplateIfNotPresent(BeanDefinitionRegistry registry, RepositoryConfigurationSource configurationSource) {
 		log.debug("register bean ['{}'] for root repository configuration source to registry", BeanDefinitionName.CHAINCODE_TEMPLATE.beanName);
 		
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(ChaincodeTemplate.class);
 		beanDefinition.setTargetType(ChaincodeOperations.class);
 
-		//ConstructorArgumentValues ctorArgs = new ConstructorArgumentValues();
+		ConstructorArgumentValues ctorArgs = new ConstructorArgumentValues();
 
-		//ctorArgs.addIndexedArgumentValue(0, createClientFactory());
-		//ctorArgs.addIndexedArgumentValue(1, new RuntimeBeanReference(BeanDefinitionName.CHAINCODE_CONVERTER.getBeanName()));
+		ctorArgs.addIndexedArgumentValue(0, new RuntimeBeanReference(BeanDefinitionName.CHAINCODE_CONVERTER.getBeanName()));
+		ctorArgs.addIndexedArgumentValue(1, DefaultFabricConfiguration.INSTANCE.getPropertiesConfiguration());
+		ctorArgs.addIndexedArgumentValue(2, new RuntimeBeanReference(BeanDefinitionName.KEY_VALUE_STORE.getBeanName()));
 
-		//beanDefinition.setConstructorArgumentValues(ctorArgs);
+		beanDefinition.setConstructorArgumentValues(ctorArgs);
 
 		registerIfNotAlreadyRegistered(beanDefinition, registry, BeanDefinitionName.CHAINCODE_TEMPLATE.getBeanName(), beanDefinition);
-	}
-
-	@SuppressWarnings("unused")
-	private BeanDefinition createClientFactory() {
-		log.debug("register bean ['{}'] for root repository configuration source to registry", BeanDefinitionName.CHAINCODE_TEMPLATE.beanName);
-		
-		GenericBeanDefinition clientFactory = new GenericBeanDefinition();
-		// clientFactory.setBeanClass(HttpClientFactory.class);
-		
-		ConstructorArgumentValues args = new ConstructorArgumentValues();
-		args.addIndexedArgumentValue(0, new RuntimeBeanReference(BeanDefinitionName.CHAINCODE_CLIENT.getBeanName()));
-		clientFactory.setConstructorArgumentValues(args);
-		
-		return clientFactory;
 	}
 }
