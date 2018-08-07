@@ -5,12 +5,12 @@
 	<artifactId>spring-data-fabric-chaincode</artifactId>
 	
 	<!-- 
-		add apache commons-beanutils jar
-	 -->
+		@changelog releases spring data fabric chaincode v1.0.1
+	-->
 	<parent>
 		<groupId>spring.data.fabric.chaincode</groupId>
 		<artifactId>spring-data-fabric-chaincode-parent</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -55,12 +55,12 @@
 			<version>${spring-framework.version}</version>
 		</dependency>
 		
-		<!-- Spring data
+		<!-- Spring data -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 			<version>${spring-data.version}</version>
-		</dependency> -->
+		</dependency> 
 		
 		 <!-- CDI -->
         <dependency>
@@ -113,14 +113,14 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback.version}</version>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		
 		<!-- log color jansi -->
@@ -128,7 +128,7 @@
 		    <groupId>org.fusesource.jansi</groupId>
 		    <artifactId>jansi</artifactId>
 		    <version>${jansi.version}</version>
-			<scope>runtime</scope>
+			<scope>compile</scope>
 		</dependency>
 		
 		<!-- Test Artifacts -->
