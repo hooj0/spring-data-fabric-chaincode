@@ -99,12 +99,12 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		ParametersParameterAccessor accessor = new ParametersParameterAccessor(method.getParameters(), parameterValues);
 		ResultProcessor processor = method.getResultProcessor().withDynamicProjection(accessor);
 		
-		Object[] params = createQuery(accessor, parameterValues);
-		params = Optional.fromNullable(params).or(parameterValues);
+		Object[] conditionValues = createQuery(accessor, parameterValues);
+		conditionValues = Optional.fromNullable(conditionValues).or(parameterValues);
 		
-		log.info("query string params: {}", new Object[] { params });
+		log.info("query string params: {}", new Object[] { conditionValues });
 		
-		ChaincodeExecutor executor = new ChaincodeExecutor(params, processor.getReturnedType());
+		ChaincodeExecutor executor = new ChaincodeExecutor(parameterValues, conditionValues, processor.getReturnedType());
 		
 		if (method.hasInstallAnnotated()) {
 			return executor.executeInstall();
@@ -123,16 +123,19 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 	
 	private class ChaincodeExecutor {
 		private Object[] parameterValues;
+		private Object[] conditionValues;
 		private ReturnedType returnedType;
 		
-		public ChaincodeExecutor(Object[] parameterValues, ReturnedType returnedType) {
+		public ChaincodeExecutor(Object[] parameterValues, Object[] conditionValues, ReturnedType returnedType) {
 			this.parameterValues = parameterValues;
+			this.conditionValues = conditionValues;
 			this.returnedType = returnedType;
 		}
 		
 		protected Object executeInstall() {
 			Install install = method.getInstallAnnotated();
 			InstallCriteria criteria = new InstallCriteria(method.getCriteria());
+			criteria.setTransientData(transformTransientData(parameterValues));
 			
 			String chaincodeLocation = null;
 			if (install != null) {
@@ -150,12 +153,13 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 				log.warn("chaincode source code directory '{}' does not exist, Try to bring the default prefix path: {}", chaincodeLocation, chaincodeFile);
 			} 
 			
-			return installOperation(criteria, parameterValues, returnedType, chaincodeFile);
+			return installOperation(criteria, conditionValues, returnedType, chaincodeFile);
 		} 
 		
 		private Object executeInstaantiate() {
 			Instantiate instantiate = method.getInstantiateAnnotated();
 			InstantiateCriteria criteria = new InstantiateCriteria(method.getCriteria());
+			criteria.setTransientData(transformTransientData(parameterValues));
 
 			String endorsementPolicyFile = null;
 			if (instantiate != null) {
@@ -169,12 +173,13 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			Transaction transaction = method.getTransactionAnnotated();
 			this.afterTransactionSet(criteria, transaction);
 			
-			return instantiateOperation(criteria, parameterValues, returnedType, proposal.func());
+			return instantiateOperation(criteria, conditionValues, returnedType, proposal.func());
 		} 
 		
 		private Object executeUpgrade() {
 			Upgrade upgrade = method.getUpgradeAnnotated();
 			UpgradeCriteria criteria = new UpgradeCriteria(method.getCriteria());
+			criteria.setTransientData(transformTransientData(parameterValues));
 			
 			String endorsementPolicyFile = null;
 			if (upgrade != null) {
@@ -190,11 +195,12 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			Transaction transaction = method.getTransactionAnnotated();
 			this.afterTransactionSet(criteria, transaction);
 			
-			return upgradeOperation(criteria, parameterValues, returnedType, proposal.func());
+			return upgradeOperation(criteria, conditionValues, returnedType, proposal.func());
 		} 
 		
 		private Object executeInvoke() {
 			InvokeCriteria criteria = new InvokeCriteria(method.getCriteria());
+			criteria.setTransientData(transformTransientData(parameterValues));
 			
 			Proposal proposal = method.getProposalAnnotated();
 			this.afterCriteriaSet(criteria, proposal);
@@ -202,7 +208,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			Transaction transaction = method.getTransactionAnnotated();
 			this.afterTransactionSet(criteria, transaction);
 			
-			return invokeOperation(criteria, parameterValues, returnedType, proposal.func());
+			return invokeOperation(criteria, conditionValues, returnedType, proposal.func());
 		}
 		
 		private Object executeQuery() {
@@ -211,7 +217,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			Proposal proposal = method.getProposalAnnotated();
 			this.afterCriteriaSet(criteria, proposal);
 
-			return queryOperation(criteria, parameterValues, returnedType, proposal.func());
+			return queryOperation(criteria, conditionValues, returnedType, proposal.func());
 		}
 		
 		private File getPolicyFile(String endorsementPolicyFile) {
