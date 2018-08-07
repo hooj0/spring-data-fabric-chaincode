@@ -44,6 +44,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Upgrad
 import io.github.hooj0.springdata.fabric.chaincode.config.AbstractChaincodeConfiguration;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.ChaincodeConverter;
+import io.github.hooj0.springdata.fabric.chaincode.core.convert.MappingChaincodeConverter;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.SimpleChaincodeMappingContext;
 import io.github.hooj0.springdata.fabric.chaincode.core.support.ChaincodeTemplate;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
@@ -77,6 +78,15 @@ public class AnnotationedRepositoryTests {
 		considerNestedRepositories = true, 
 		includeFilters = @Filter(pattern = ".*Repo", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
+		
+		@Autowired
+		private MappingChaincodeConverter mappingConverter;
+		
+		@Bean
+		public ChaincodeTemplate chaincodeTemplate() throws ClassNotFoundException {
+			return new ChaincodeTemplate(mappingConverter);
+		}
+		
 		@Override
 		protected Set<Class<?>> getInitialEntitySet() {
 			return Collections.singleton(Person.class);
