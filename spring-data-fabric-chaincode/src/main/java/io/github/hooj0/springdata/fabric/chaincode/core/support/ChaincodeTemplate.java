@@ -1,6 +1,6 @@
 package io.github.hooj0.springdata.fabric.chaincode.core.support;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.InputStream;
@@ -200,7 +200,7 @@ public class ChaincodeTemplate extends AbstractChaincodeTemplate {
 		log.debug("chaincode template exec install, criteria: {}", criteria);
 		
 		Assert.notNull(chaincodeSourceFile, "chaincodeSourceFile is null!");
-		checkArgument(chaincodeSourceFile.exists(), "chaincodeSourceFile file is not exists: %s", chaincodeSourceFile.getAbsolutePath());
+		checkState(chaincodeSourceFile.exists(), "chaincodeSourceFile file is not exists: %s", chaincodeSourceFile.getAbsolutePath());
 		
 		afterCriteriaSet(criteria);
 
@@ -216,6 +216,40 @@ public class ChaincodeTemplate extends AbstractChaincodeTemplate {
 		afterCriteriaSet(criteria);
 
 		return createDeployOperations(criteria.getCriteria()).install(criteria, chaincodeInputStream);
+	}
+	
+	@Override
+	public ResultSet installFor(InstallCriteria criteria, String chaincodeSourceLocation) {
+		log.debug("chaincode template exec install, criteria: {}", criteria);
+		
+		Assert.hasText(chaincodeSourceLocation, "chaincodeSourceLocation is null!");
+		
+		afterCriteriaSet(criteria);
+
+		return createDeployOperations(criteria.getCriteria()).installFor(criteria, chaincodeSourceLocation);
+	}
+
+	@Override
+	public ResultSet installFor(InstallCriteria criteria, File chaincodeSourceFile) {
+		log.debug("chaincode template exec install, criteria: {}", criteria);
+		
+		Assert.notNull(chaincodeSourceFile, "chaincodeSourceFile is null!");
+		checkState(chaincodeSourceFile.exists(), "chaincodeSourceFile file is not exists: %s", chaincodeSourceFile.getAbsolutePath());
+		
+		afterCriteriaSet(criteria);
+
+		return createDeployOperations(criteria.getCriteria()).installFor(criteria, chaincodeSourceFile);
+	}
+
+	@Override
+	public ResultSet installFor(InstallCriteria criteria, InputStream chaincodeInputStream) {
+		log.debug("chaincode template exec install, criteria: {}", criteria);
+		
+		Assert.notNull(chaincodeInputStream, "chaincodeInputStream is null!");
+		
+		afterCriteriaSet(criteria);
+
+		return createDeployOperations(criteria.getCriteria()).installFor(criteria, chaincodeInputStream);
 	}
 
 	@Override
