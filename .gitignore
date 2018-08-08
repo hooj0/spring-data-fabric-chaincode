@@ -19,6 +19,8 @@
 *.tar.gz
 *.rar
 */*.jar
+*.bak
+*/*.bak
 
 target/*
 */target/*
