@@ -33,6 +33,7 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersist
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentProperty;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * chaincode Repository query method information
@@ -45,6 +46,7 @@ import io.github.hooj0.springdata.fabric.chaincode.enums.ProposalType;
  * @email hoojo_@126.com
  * @version 1.0
  */
+@Slf4j
 @SuppressWarnings("rawtypes")
 public class ChaincodeQueryMethod extends QueryMethod {
 
@@ -81,13 +83,13 @@ public class ChaincodeQueryMethod extends QueryMethod {
 			}
 		}
 		
-		System.out.println("--------------------------------------------------");
-		System.out.println("method: " + method.getName());
-		System.out.println("Proposal: " + proposalAnnotated);
-		System.out.println("Deploy: " + deployAnnotated);
-		System.out.println("annotationInstatnces: " + annotationInstatnces);
-		System.out.println("criteria: " + criteria);
-		System.out.println("--------------------------------------------------");
+		log.trace("--------------------------------------------------");
+		log.trace("method: " + method.getName());
+		log.trace("Proposal: " + proposalAnnotated);
+		log.trace("Deploy: " + deployAnnotated);
+		log.trace("annotationInstatnces: " + annotationInstatnces);
+		log.trace("criteria: " + criteria);
+		log.trace("--------------------------------------------------");
 	}
 
 	public Proposal getProposalAnnotated() {
