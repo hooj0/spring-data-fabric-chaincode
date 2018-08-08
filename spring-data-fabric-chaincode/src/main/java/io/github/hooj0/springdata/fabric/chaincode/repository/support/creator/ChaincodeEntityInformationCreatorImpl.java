@@ -37,7 +37,7 @@ public class ChaincodeEntityInformationCreatorImpl implements ChaincodeEntityInf
 		ChaincodePersistentEntity<T> persistentEntity = (ChaincodePersistentEntity<T>) mappingContext.getRequiredPersistentEntity(domainClass);
 
 		Assert.notNull(persistentEntity, String.format("Unable to obtain mapping metadata for %s!", domainClass));
-		// Assert.notNull(persistentEntity.getIdProperty(), String.format("No id property found for %s!", domainClass));
+		Assert.notNull(persistentEntity.getIdProperty(), String.format("No id property found for %s!", domainClass));
 
 		MappingChaincodeEntityInformation<T, ID> entityInformation = new MappingChaincodeEntityInformation<>(persistentEntity, new MappingChaincodeConverter(mappingContext));
 		return entityInformation;
