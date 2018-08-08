@@ -1,7 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode;
 
 /**
- * <b>function:</b> Chaincode Root Exception
+ * chaincode root exception defined
  * @author hoojo
  * @createDate 2018年7月17日 上午10:24:00
  * @file ChaincodeRootException.java
@@ -13,13 +13,21 @@ package io.github.hooj0.springdata.fabric.chaincode;
  */
 public class ChaincodeRootException extends RuntimeException {
 
-	private static final long serialVersionUID = 4481306050552270511L;
+	private static final long serialVersionUID = 1L;
 
-	public ChaincodeRootException(String string, Exception e) {
-		super(string, e);
+	public ChaincodeRootException() {
+		super();
 	}
 
-	public ChaincodeRootException(String string) {
-		super(string);
+	public ChaincodeRootException(Throwable cause, String message, Object... args) {
+		super(String.format(message, args), cause);
+	}
+
+	public ChaincodeRootException(String message, Object... args) {
+		super(String.format(message, args));
+	}
+
+	public ChaincodeRootException(Throwable cause) {
+		super(cause);
 	}
 }
