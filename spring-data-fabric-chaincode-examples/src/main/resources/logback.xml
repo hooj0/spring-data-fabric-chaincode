@@ -12,16 +12,10 @@
 	<logger name="io.grpc.netty" level="ERROR" />
 	<logger name="io.netty" level="ERROR" />
 	<logger name="org.hyperledger.fabric.sdk" level="ERROR" />
+	<logger name="org.hyperledger.fabric_ca.sdk" level="ERROR" />
 	<logger name="io.github.hooj0.springdata.fabric.chaincode" level="DEBUG" />
 
 	<root level="DEBUG">
 		<appender-ref ref="console" />
 	</root>
-	
-	<!-- 开发环境下的日志配置 -->
-    <springProfile name="dev">
-        <root level="DEBUG">
-            <appender-ref ref="CONSOLE" />
-        </root>
-    </springProfile>
 </configuration>
