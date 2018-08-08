@@ -28,7 +28,7 @@ public class Account extends AbstractEntity {
 	private long timestamp;
 	
 	@Field(transientAlias = "transactionId")
-	private String txId;
+	private String requestId;
 	
 	// proposal request transient map data 
 	@Transient(alias = "dateTime")
@@ -58,19 +58,19 @@ public class Account extends AbstractEntity {
 		this.timestamp = timestamp;
 	}
 
-	public String getTxId() {
-		return txId;
-	}
-
-	public void setTxId(String txId) {
-		this.txId = txId;
-	}
-
 	public Date getDate() {
 		return date;
 	}
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
 	}
 }
