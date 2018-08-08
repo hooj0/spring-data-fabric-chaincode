@@ -11,7 +11,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<name>Spring Data Hyperledger Fabric Chaincode SDK</name>
+	<name>Spring Data Hyperledger Fabric Chaincode SDK example</name>
 	<description>Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK examples.</description>
 	<url>https://github.com/hooj0/spring-data-fabric-chaincode</url>
 
