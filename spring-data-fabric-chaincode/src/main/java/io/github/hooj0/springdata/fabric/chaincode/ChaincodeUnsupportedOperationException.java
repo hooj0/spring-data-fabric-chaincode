@@ -1,7 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode;
 
 /**
- * <b>function:</b> Unsupported Operation Exception
+ * chaincode unsupported operation custom exception
  * @author hoojo
  * @createDate 2018年7月17日 下午3:52:07
  * @file UnsupportedOperationException.java
@@ -15,11 +15,19 @@ public class ChaincodeUnsupportedOperationException extends ChaincodeRootExcepti
 
 	private static final long serialVersionUID = 8183721727089671557L;
 
-	public ChaincodeUnsupportedOperationException(String string) {
-		super(string);
+	public ChaincodeUnsupportedOperationException() {
+		super();
 	}
-	
-	public ChaincodeUnsupportedOperationException(String string, Exception e) {
-		super(string, e);
+
+	public ChaincodeUnsupportedOperationException(Throwable cause, String message, Object... args) {
+		super(String.format(message, args), cause);
+	}
+
+	public ChaincodeUnsupportedOperationException(String message, Object... args) {
+		super(String.format(message, args));
+	}
+
+	public ChaincodeUnsupportedOperationException(Throwable cause) {
+		super(cause);
 	}
 }
