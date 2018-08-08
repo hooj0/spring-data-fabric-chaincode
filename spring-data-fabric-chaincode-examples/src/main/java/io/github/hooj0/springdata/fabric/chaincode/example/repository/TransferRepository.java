@@ -49,6 +49,9 @@ public interface TransferRepository extends ChaincodeRepository<Account> {
 	@Invoke(clientUser = "user1", args = { "a", "b", ":#{#account.aAmount}"})
 	ResultSet move(@Param("account") Account account);
 	
+	@Invoke(clientUser = "user1", func = "move", args = { "a", "b", ":#{#account.aAmount}"})
+	Account moveFor(@Param("account") Account account);
+	
 	@Channel(name = "mychannel", org = "peerOrg1")
 	@Chaincode(name = "example_cc_go", version = "v11.2")
 	@Repository("newTransferRepository")
