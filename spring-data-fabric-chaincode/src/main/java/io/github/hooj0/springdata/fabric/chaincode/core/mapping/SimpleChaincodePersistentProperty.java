@@ -21,7 +21,7 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Transient;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 简单 Property 信息实现 
+ * chaincode simple persistent entity property mapping support
  * @author hoojo
  * @createDate 2018年7月17日 上午11:13:20
  * @file SimpleChaincodePersistentProperty.java
