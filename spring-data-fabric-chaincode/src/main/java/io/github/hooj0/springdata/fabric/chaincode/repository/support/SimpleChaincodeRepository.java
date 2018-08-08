@@ -208,6 +208,36 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 		
 		return this.operations.install(installCriteria, chaincodeInputStream);
 	}
+	
+	@Override
+	public ResultSet installFor(InstallProposal proposal, String chaincodeSourceLocation) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
+		
+		afterCriteriaSet(proposal, installCriteria);
+		
+		return this.operations.installFor(installCriteria, chaincodeSourceLocation);
+	}
+
+	@Override
+	public ResultSet installFor(InstallProposal proposal, File chaincodeSourceFile) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
+		
+		afterCriteriaSet(proposal, installCriteria);
+		
+		return this.operations.installFor(installCriteria, chaincodeSourceFile);
+	}
+
+	@Override
+	public ResultSet installFor(InstallProposal proposal, InputStream chaincodeInputStream) {
+		InstallCriteria installCriteria = new InstallCriteria(criteria);
+		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
+		
+		afterCriteriaSet(proposal, installCriteria);
+		
+		return this.operations.installFor(installCriteria, chaincodeInputStream);
+	}
 
 	@Override
 	public ResultSet instantiate(InstantiateProposal proposal, String func) {
