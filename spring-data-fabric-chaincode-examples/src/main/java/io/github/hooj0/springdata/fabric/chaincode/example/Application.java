@@ -64,7 +64,7 @@ public class Application {
 		account.setbAmount(800);
 		account.setDate(new Date());
 		account.setTimestamp(System.currentTimeMillis());
-		account.setTxId("xxx" + System.currentTimeMillis());
+		account.setRequestId("xxx" + System.currentTimeMillis());
 		
 		// instantiate chaincode
 		ResultSet rs = accountService.instantiate(account);
@@ -99,7 +99,7 @@ public class Application {
 		account.setbAmount(800);
 		account.setDate(new Date());
 		account.setTimestamp(System.currentTimeMillis());
-		account.setTxId("xxx" + System.currentTimeMillis());
+		account.setRequestId("xxx" + System.currentTimeMillis());
 		
 		// instantiate chaincode
 		TransactionEvent event = service.instantiate(account);
@@ -142,7 +142,7 @@ public class Application {
 		account.setbAmount(800);
 		account.setDate(new Date());
 		account.setTimestamp(System.currentTimeMillis());
-		account.setTxId("xxx" + System.currentTimeMillis());
+		account.setRequestId("xxx" + System.currentTimeMillis());
 		
 		// instantiate chaincode
 		ResultSet rs = service.instantiate(account);
