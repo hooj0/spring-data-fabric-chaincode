@@ -31,7 +31,6 @@ import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersist
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria.CriteriaBuilder;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
-import io.github.hooj0.springdata.fabric.chaincode.repository.query.PartTreeChaincodeQuery;
 import io.github.hooj0.springdata.fabric.chaincode.repository.query.StringBasedChaincodeQuery;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ChaincodeEntityInformationCreator;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ChaincodeEntityInformationCreatorImpl;
@@ -174,20 +173,14 @@ public class ChaincodeRepositoryFactory extends RepositoryFactorySupport {
 			ChaincodeQueryMethod queryMethod = new ChaincodeQueryMethod(method, metadata, factory, mappingContext, criteria);
 			String namedQueryName = queryMethod.getNamedQueryName();
 
-			log.debug("queryMethod.getName: {}", queryMethod.getName());
-			log.debug("queryMethod: {}", queryMethod);
-			log.debug("namedQueryName: {}", namedQueryName);
-
-			System.out.println("namedQueryName: " + namedQueryName);
-			System.out.println("RepositoryInterface: " + metadata.getRepositoryInterface().getSimpleName());
-			
 			if (namedQueries.hasQuery(namedQueryName)) {
 				String namedQuery = namedQueries.getQuery(namedQueryName);
 				return new StringBasedChaincodeQuery(namedQuery, queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
 			} else if (queryMethod.hasProposalAnnotated()) {
 				return new StringBasedChaincodeQuery(queryMethod, operations, EXPRESSION_PARSER, evaluationContextProvider);
 			} else {
-				return new PartTreeChaincodeQuery(queryMethod, operations);
+				//return new PartTreeChaincodeQuery(queryMethod, operations);
+				throw new ChaincodeUnsupportedOperationException("Unknow Support method '%s.%s' has not been implemented yet.", metadata.getRepositoryInterface().getSimpleName(), method.getName());
 			}
 		}
 	}
