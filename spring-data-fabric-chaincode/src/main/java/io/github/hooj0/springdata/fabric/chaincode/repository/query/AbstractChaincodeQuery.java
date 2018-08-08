@@ -2,6 +2,8 @@ package io.github.hooj0.springdata.fabric.chaincode.repository.query;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -9,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
+import org.hyperledger.fabric.sdk.ProposalResponse;
 import org.hyperledger.fabric.sdk.User;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.data.mapping.context.MappingContext;
@@ -23,6 +26,7 @@ import com.google.common.reflect.TypeToken;
 
 import io.github.hooj0.fabric.sdk.commons.core.execution.result.ResultSet;
 import io.github.hooj0.fabric.sdk.commons.domain.Organization;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.convert.DateTimeConverters;
 import io.github.hooj0.springdata.fabric.chaincode.core.mapping.ChaincodePersistentEntity;
@@ -86,8 +90,20 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	protected abstract Object[] createQuery(ParametersParameterAccessor parameterAccessor, Object[] parameterValues);
 	
 	protected Object installOperation(InstallCriteria criteria, Object[] parameterValues, ReturnedType returnedType, File chaincodeFile) {
+		Class<?> resultClass = returnedType.getReturnedType();
 
-		return operations.install(criteria, chaincodeFile);
+		ResultSet result = operations.installFor(criteria, chaincodeFile);
+		if (ClassUtils.isAssignable(Collection.class, method.getResultType()) && ClassUtils.isAssignable(ProposalResponse.class, resultClass)) {
+			return result.getResponses();
+		} else if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
+			return result;
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result.getTransactionId();
+		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
+			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+		}
+		
+		return result;
 	} 
 	
 	protected Object instantiateOperation(InstantiateCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
@@ -111,7 +127,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return serialization.deserialize(resultClass, result.getResult());
+			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
 		}
 		
 		return result.getResult();
@@ -138,7 +154,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return serialization.deserialize(resultClass, result.getResult());
+			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
 		}
 		
 		return result.getResult();
@@ -185,7 +201,7 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return serialization.deserialize(resultClass, result.getResult());
+			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
 		}
 		
 		return result.getResult();
@@ -193,25 +209,23 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 	
 	protected Object queryOperation(QueryCriteria criteria, Object[] parameterValues, ReturnedType returnedType, String func) {
 
-		func = StringUtils.defaultIfBlank(func, method.getName());
-		
 		Class<?> resultClass = returnedType.getReturnedType();
 		
+		func = StringUtils.defaultIfBlank(func, method.getName());
+		
+		ResultSet result = operations.queryFor(criteria, func, parameterValues);
+		
 		if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
-			return operations.queryFor(criteria, func, parameterValues);
-		} 
-		
-		String result = operations.query(criteria, func, parameterValues);
-		
-		if (hasDeserializeResult()) {
-			return deserializeResult(resultClass, result);
-		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result;
+		} else if (hasDeserializeResult()) {
+			return deserializeResult(resultClass, result.getResult());
+		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
+			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return serialization.deserialize(resultClass, result);
+			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
 		} 
 		
-		return result;
+		return result.getResult();
 	} 
 	
 	protected boolean hasSerializeParameter() {
@@ -305,6 +319,24 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		}
 		
 		return transientData;
+	}
+	
+	protected Object bindTransactionId(Object result, ResultSet resultSet) {
+		ChaincodePersistentEntity<?> entity = mappingContext.getPersistentEntity(result.getClass());
+		if (entity != null) {
+			Method setter = entity.getRequiredIdProperty().getSetter();
+			try {
+				if (ClassUtils.isAssignable(byte[].class, setter.getReturnType())) {
+					setter.invoke(result, resultSet.getTransactionId().getBytes());
+				} else {
+					setter.invoke(result, resultSet.getTransactionId());
+				}
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new ChaincodeOperationException(e, "chaincode setter transaction id '%s.%s' exception", setter.getClass().getName(), setter.getName());
+			}
+		}
+		
+		return result;
 	}
 	
 	protected User getUser(String user) {
