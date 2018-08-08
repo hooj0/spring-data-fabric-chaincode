@@ -66,8 +66,8 @@ public class AccountServiceTest {
 		account.setbAmount(800);
 		account.setDate(new Date());
 		account.setTimestamp(System.currentTimeMillis());
-		account.setTxId("xxx" + System.currentTimeMillis());
+		account.setRequestId("xxx" + System.currentTimeMillis());
 		
-		repo.move(account);
+		System.out.println(repo.moveFor(account));
 	}
 }
