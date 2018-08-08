@@ -54,6 +54,30 @@ public interface DeployChaincodeRepository<T> extends ChaincodeRepository<T> {
 	 */
 	Collection<ProposalResponse> install(InstallProposal proposal, InputStream chaincodeInputStream);
 	
+	/**
+	 * 安装智能合约 Chaincode 
+	 * @author hoojo
+	 * @createDate 2018年7月20日 下午3:58:26
+	 * @param chaincodeSourceLocation 智能合约源码文件位置
+	 */
+	ResultSet installFor(InstallProposal proposal, String chaincodeSourceLocation);
+
+	/**
+	 * 安装智能合约 Chaincode 
+	 * @author hoojo
+	 * @createDate 2018年7月20日 下午3:58:26
+	 * @param chaincodeSourceFile 智能合约源码文件
+	 */
+	ResultSet installFor(InstallProposal proposal, File chaincodeSourceFile);
+	
+	/**
+	 * 安装智能合约 Chaincode 
+	 * @author hoojo
+	 * @createDate 2018年7月20日 下午3:59:08
+	 * @param chaincodeInputStream 智能合约源码文件Stream
+	 */
+	ResultSet installFor(InstallProposal proposal, InputStream chaincodeInputStream);
+	
 	// instantiate
 	
 	/**
