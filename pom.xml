@@ -13,7 +13,7 @@
 
 	<packaging>pom</packaging>
 
-	<name>Spring Data Hyperledger Fabric Chaincode SDK</name>
+	<name>Spring Data Hyperledger Fabric Chaincode SDK parent</name>
 	<description>Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK.</description>
 	<url>https://github.com/hooj0/spring-data-fabric-chaincode</url>
 
@@ -44,7 +44,7 @@
 
 		<!-- Spring -->
 		<spring-framework.version>5.0.2.RELEASE</spring-framework.version>
-		<spring-data.version>v2.1.0.BUILD</spring-data.version>
+		<spring-data.version>2.1.0-build</spring-data.version>
 
 		<cdi.version>1.0</cdi.version>
 		<lombok.version>1.18.0</lombok.version>
@@ -65,12 +65,12 @@
 		<junit.version>4.12</junit.version>
 
 		<!-- Fabric SDKs Commons -->
-		<fabric-sdk-commons.version>1.0</fabric-sdk-commons.version>
+		<fabric-sdk-commons.version>1.1</fabric-sdk-commons.version>
 	</properties>
 
 	<modules>
 		<module>spring-data-fabric-chaincode</module>
-		<module>spring-data-fabric-chaincode-examples</module>
+		<!-- <module>spring-data-fabric-chaincode-examples</module> -->
 	</modules>
 
 	<build>
@@ -93,10 +93,36 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
+					<encoding>UTF-8</encoding>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok-maven-plugin</artifactId>
+				<version>1.18.0.0</version>
+				<configuration>
+					<addOutputDirectory>false</addOutputDirectory>
+					<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+	
 </project>
