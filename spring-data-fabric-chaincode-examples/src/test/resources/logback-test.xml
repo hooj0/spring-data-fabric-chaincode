@@ -12,6 +12,7 @@
 	<logger name="io.grpc.netty" level="ERROR" />
 	<logger name="io.netty" level="ERROR" />
 	<logger name="org.hyperledger.fabric.sdk" level="ERROR" />
+	<logger name="org.hyperledger.fabric_ca.sdk" level="ERROR" />
 	<logger name="io.github.hooj0.springdata.fabric.chaincode" level="DEBUG" />
 
 	<root level="DEBUG">
