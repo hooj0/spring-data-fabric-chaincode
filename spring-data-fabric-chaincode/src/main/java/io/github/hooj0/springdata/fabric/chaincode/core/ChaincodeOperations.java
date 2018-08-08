@@ -55,6 +55,15 @@ public interface ChaincodeOperations {
 	
 	Collection<ProposalResponse> install(InstallCriteria criteria, InputStream chaincodeInputStream);
 	
+	// install return result set
+
+	ResultSet installFor(InstallCriteria criteria, String chaincodeSourceLocation);
+
+	ResultSet installFor(InstallCriteria criteria, File chaincodeSourceFile);
+
+	ResultSet installFor(InstallCriteria criteria, InputStream chaincodeInputStream);
+	
+	
 	// instantiate
 	
 	ResultSet instantiate(InstantiateCriteria criteria, String func);
