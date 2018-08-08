@@ -47,10 +47,13 @@ public class SimpleChaincodePersistentProperty extends AnnotationBasedPersistent
 	
 	static {
 		SUPPORTED_ID_TYPES.add(String.class);
-		SUPPORTED_ID_TYPES.add(Long.class);
-		SUPPORTED_ID_TYPES.add(Integer.class);
+		SUPPORTED_ID_TYPES.add(byte[].class);
 
 		SUPPORTED_ID_PROPERTY_NAMES.add("id");
+		SUPPORTED_ID_PROPERTY_NAMES.add("hash");
+		SUPPORTED_ID_PROPERTY_NAMES.add("hashId");
+		SUPPORTED_ID_PROPERTY_NAMES.add("txId");
+		SUPPORTED_ID_PROPERTY_NAMES.add("transactionId");
 	}
 	
 	public SimpleChaincodePersistentProperty(Property property, PersistentEntity<?, ChaincodePersistentProperty> owner, SimpleTypeHolder simpleTypeHolder) {
