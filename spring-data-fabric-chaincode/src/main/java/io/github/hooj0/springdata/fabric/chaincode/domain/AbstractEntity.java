@@ -4,6 +4,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * spring data fabric chaincode basic abstract entity, other entity objects need to inherit this entity
@@ -17,7 +19,11 @@ import io.github.hooj0.springdata.fabric.chaincode.annotations.Entity;
  * @version 1.0
  */
 @Entity
+@Getter
+@Setter
 public abstract class AbstractEntity {
+	
+	private String transactionId;
 
 	@Override
 	public String toString() {
