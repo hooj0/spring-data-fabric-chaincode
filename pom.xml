@@ -9,7 +9,7 @@
 	 
 	<groupId>spring.data.fabric.chaincode</groupId>
 	<artifactId>spring-data-fabric-chaincode-parent</artifactId>
-	<version>1.0.1</version>
+	<version>1.1.2</version>
 
 	<packaging>pom</packaging>
 
@@ -65,11 +65,12 @@
 		<junit.version>4.12</junit.version>
 
 		<!-- Fabric SDKs Commons -->
-		<fabric-sdk-commons.version>1.1</fabric-sdk-commons.version>
+		<fabric-sdk-commons.version>1.1.2</fabric-sdk-commons.version>
 	</properties>
 
 	<modules>
 		<module>spring-data-fabric-chaincode</module>
+		<module>spring-data-fabric-chaincode-domain</module>
 		<!-- <module>spring-data-fabric-chaincode-examples</module> -->
 	</modules>
 
@@ -125,4 +126,15 @@
 		</plugins>
 	</build>
 	
+	<distributionManagement>
+	    <repository>
+	        <id>releases</id>
+	        <url>http://maven.masget.com:7078/nexus/content/repositories/releases/</url>
+	    </repository>
+	
+	    <snapshotRepository>
+	        <id>Snapshots</id>
+	        <url>http://maven.masget.com:7078/nexus/content/repositories/snapshots/</url>
+	    </snapshotRepository>
+	</distributionManagement>
 </project>
