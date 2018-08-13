@@ -1,6 +1,10 @@
 package io.github.hooj0.springdata.fabric.chaincode.core.serialize;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
+import io.github.hooj0.springdata.fabric.chaincode.repository.query.ChaincodeQueryMethod;
 
 /**
  * gson chaincode entity serialization support
@@ -17,15 +21,29 @@ public enum GsonChaincodeEntitySerialization implements ChaincodeEntitySerializa
 
 	INSTANCE;
 	
-	private static final Gson gson = new Gson();
+	private static final Gson gson;
+	
+	static {
+		GsonBuilder builder = new GsonBuilder();
+		// 2018-08-13T16:09:54.1769762+08:00
+		builder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").serializeNulls().disableHtmlEscaping();
+		
+		gson = builder.create();
+	}
 	
 	@Override
 	public <T> String serialize(T entity) {
 		return gson.toJson(entity);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T deserialize(Class<T> clazz, String json) {
-		return gson.fromJson(json, clazz);
+	public <T> T deserialize(String json, ChaincodeQueryMethod method) {
+
+		if (method.isCollectionQuery()) {
+	        throw new ChaincodeUnsupportedOperationException("Gson Provider not support collection '%s' deserialize.", method.getReturnType().getRawTypeInformation().getType());
+		} 
+		
+		return (T) gson.fromJson(json, method.getResultType());
 	}
 }
