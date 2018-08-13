@@ -2,6 +2,7 @@ package io.github.hooj0.springdata.fabric.chaincode.enums;
 
 import io.github.hooj0.springdata.fabric.chaincode.core.serialize.ChaincodeEntitySerialization;
 import io.github.hooj0.springdata.fabric.chaincode.core.serialize.GsonChaincodeEntitySerialization;
+import io.github.hooj0.springdata.fabric.chaincode.core.serialize.JacksonChaincodeEntitySerialization;
 
 /**
  * chaincode repository interface input output serialization provider
@@ -34,7 +35,9 @@ public enum SerializationProvider {
 		if (this == GSON) {
 			return GsonChaincodeEntitySerialization.INSTANCE;
 		}
-
-		return GsonChaincodeEntitySerialization.INSTANCE;
+		if (this == JACKSON) {
+			return JacksonChaincodeEntitySerialization.INSTANCE;
+		}
+		return JacksonChaincodeEntitySerialization.INSTANCE;
 	}
 }
