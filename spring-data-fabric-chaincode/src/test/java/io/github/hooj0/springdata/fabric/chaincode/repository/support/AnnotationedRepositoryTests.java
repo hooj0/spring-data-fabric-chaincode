@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import javax.inject.Inject;
+
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
 import org.hyperledger.fabric.sdk.ChaincodeID;
 import org.hyperledger.fabric.sdk.TransactionRequest.Type;
@@ -79,7 +81,7 @@ public class AnnotationedRepositoryTests {
 		includeFilters = @Filter(pattern = ".*Repo", type = FilterType.REGEX))
 	public static class Config extends AbstractChaincodeConfiguration {
 		
-		@Autowired
+		@Inject
 		private MappingChaincodeConverter mappingConverter;
 		
 		@Bean
