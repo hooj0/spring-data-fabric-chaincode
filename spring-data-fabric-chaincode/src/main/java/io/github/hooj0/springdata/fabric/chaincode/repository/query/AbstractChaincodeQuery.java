@@ -93,6 +93,9 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		Class<?> resultClass = returnedType.getReturnedType();
 
 		ResultSet result = operations.installFor(criteria, chaincodeFile);
+		if (result == null) {
+			return null;
+		}
 		if (ClassUtils.isAssignable(Collection.class, method.getResultType()) && ClassUtils.isAssignable(ProposalResponse.class, resultClass)) {
 			return result.getResponses();
 		} else if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
@@ -100,7 +103,10 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getTransactionId();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return bindTransactionId(serialization.deserialize(result.getResult(), method), result);
+			}
+			return null;
 		}
 		
 		return result;
@@ -121,13 +127,21 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		}
 		
 		ResultSet result = operations.instantiate(criteria, func, parameterValues);
-		
+		if (result == null) {
+			return null;
+		}
 		if (hasDeserializeResult()) {
-			return deserializeResult(resultClass, result.getResult());
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return deserializeResult(method, result.getResult());
+			}
+			return null;
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return bindTransactionId(serialization.deserialize(result.getResult(), method), result);
+			}
+			return null;
 		}
 		
 		return result.getResult();
@@ -148,13 +162,21 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		}
 		
 		ResultSet result = operations.upgrade(criteria, func, parameterValues);
-		
+		if (result == null) {
+			return null;
+		}
 		if (hasDeserializeResult()) {
-			return deserializeResult(resultClass, result.getResult());
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return deserializeResult(method, result.getResult());
+			}
+			return null;
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return bindTransactionId(serialization.deserialize(result.getResult(), method), result);
+			}
+			return null;
 		}
 		
 		return result.getResult();
@@ -167,22 +189,6 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		
 		Class<?> resultClass = returnedType.getReturnedType();
 		TypeToken<CompletableFuture<TransactionEvent>> typeToken = new TypeToken<CompletableFuture<TransactionEvent>>() {};
-		/*
-		System.err.println("1->" + method.getReturnType().getActualType());
-		System.err.println("3->" + typeToken.getType());
-		System.err.println("4->" + method.getResultType());
-		System.err.println("5->" + method.getReturnedObjectType());
-		System.err.println("b2->" + method.getReturnType().getActualType().getType());
-		System.err.println("e->" + typeToken.getType().getTypeName());
-		
-		
-		1->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
-		3->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
-		4->class java.util.concurrent.CompletableFuture
-		5->class org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent
-		b2->class java.util.concurrent.CompletableFuture
-		e->java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent$TransactionEvent>
-		 */
 		
 		boolean isFutrued = StringUtils.equals(typeToken.getType().getTypeName(), method.getReturnType().getActualType().toString());
 		boolean isFutruedEvent = (ClassUtils.isAssignable(CompletableFuture.class, method.getResultType()) && ClassUtils.isAssignable(TransactionEvent.class, resultClass));
@@ -195,13 +201,21 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		}
 		
 		ResultSet result = operations.invoke(criteria, func, parameterValues);
-		
+		if (result == null) {
+			return null;
+		}
 		if (hasDeserializeResult()) {
-			return deserializeResult(resultClass, result.getResult());
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return deserializeResult(method, result.getResult());
+			}
+			return null;
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+			if (StringUtils.isNotBlank(result.getResult())) {
+				return bindTransactionId(serialization.deserialize(result.getResult(), method), result);
+			}
+			return null;
 		}
 		
 		return result.getResult();
@@ -214,15 +228,23 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		func = StringUtils.defaultIfBlank(func, method.getName());
 		
 		ResultSet result = operations.queryFor(criteria, func, parameterValues);
-		
+		if (result == null) {
+			return null;
+		}
 		if (ClassUtils.isAssignable(ResultSet.class, resultClass)) {
 			return result;
 		} else if (hasDeserializeResult()) {
-			return deserializeResult(resultClass, result.getResult());
+			if (StringUtils.isBlank(result.getResult())) {
+				return null;
+			}
+			return deserializeResult(method, result.getResult());
 		} else if (ClassUtils.isAssignable(String.class, resultClass)) {
 			return result.getResult();
 		} else if (!ClassUtils.isPrimitiveOrWrapper(resultClass)) {
-			return bindTransactionId(serialization.deserialize(resultClass, result.getResult()), result);
+			if (StringUtils.isBlank(result.getResult())) {
+				return null;
+			}
+			return bindTransactionId(serialization.deserialize(result.getResult(), method), result);
 		} 
 		
 		return result.getResult();
@@ -262,9 +284,9 @@ public abstract class AbstractChaincodeQuery implements RepositoryQuery {
 		return params;
 	}
 	
-	protected Object deserializeResult(Class<?> clazz, String result) {
+	protected Object deserializeResult(ChaincodeQueryMethod method, String result) {
 		
-		return method.getSerializationAnnotated().provider().getSerialization().deserialize(clazz, result);
+		return method.getSerializationAnnotated().provider().getSerialization().deserialize(result, method);
 	}
 	
 	protected Map<String, byte[]> transformTransientData(Object[] parameterValues) {
