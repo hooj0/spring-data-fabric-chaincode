@@ -1,5 +1,7 @@
 package io.github.hooj0.springdata.fabric.chaincode.core.convert;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -14,6 +16,7 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * 时间格式化转换器，在 ConversionService 中可以设置使用
+ * @changelog add java date converter string fromat date
  * @author hoojo
  * @createDate 2018年7月11日 上午9:55:03
  * @file DateTimeConverters.java
@@ -23,7 +26,8 @@ import org.springframework.core.convert.converter.Converter;
  */
 public final class DateTimeConverters {
 
-	private static DateTimeFormatter formatter = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
+	private static final DateTimeFormatter formatter = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
+	private static final DateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
 
 	private DateTimeConverters() {}
 	
@@ -71,7 +75,7 @@ public final class DateTimeConverters {
 				return null;
 			}
 
-			return formatter.print(source.getTime());
+			return DATE_FORMATTER.format(source.getTime());
 		}
 	}
 }
