@@ -49,6 +49,7 @@
 		<cdi.version>1.0</cdi.version>
 		<lombok.version>1.18.0</lombok.version>
 		<joda-time.version>2.10</joda-time.version>
+		<jackson.version>2.9.6</jackson.version>
 
 		<!-- google -->
 		<guava.version>25.1-jre</guava.version>
@@ -70,7 +71,7 @@
 
 	<modules>
 		<module>spring-data-fabric-chaincode</module>
-		<module>spring-data-fabric-chaincode-domain</module>
+		<!-- <module>spring-data-fabric-chaincode-domain</module> -->
 		<!-- <module>spring-data-fabric-chaincode-examples</module> -->
 	</modules>
 
@@ -126,15 +127,4 @@
 		</plugins>
 	</build>
 	
-	<distributionManagement>
-	    <repository>
-	        <id>releases</id>
-	        <url>http://maven.masget.com:7078/nexus/content/repositories/releases/</url>
-	    </repository>
-	
-	    <snapshotRepository>
-	        <id>Snapshots</id>
-	        <url>http://maven.masget.com:7078/nexus/content/repositories/snapshots/</url>
-	    </snapshotRepository>
-	</distributionManagement>
 </project>
