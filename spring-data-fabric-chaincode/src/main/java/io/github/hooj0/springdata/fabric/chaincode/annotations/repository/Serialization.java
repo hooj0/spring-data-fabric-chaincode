@@ -27,5 +27,5 @@ public @interface Serialization {
 
 	SerializationMode value() default SerializationMode.ALL;
 	
-	SerializationProvider provider() default SerializationProvider.GSON;
+	SerializationProvider provider() default SerializationProvider.JACKSON;
 }
