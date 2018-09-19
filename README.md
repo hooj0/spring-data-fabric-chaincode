@@ -2,9 +2,13 @@
 Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK.
 
 # 1、运行环境
-+ hyperledger chaincode v1.1+
-+ spring data 2.1.0+
-+ jdk 8+
++ `fabric-sdk-java` v1.1+
++ `spring data` 2.1.0+
++ `jdk` 8+
+
+**extra jar**
++ `fabric-sdk-commons`  v1.1+
++ `spring-data-fabric-chaincode`  v1.1+
 
 # 2、添加依赖
 在 `pom.xml` 中添加如下配置
@@ -73,11 +77,13 @@ export HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST=192.168.99.100
 ```
 当在环境变量中配置host后，默认的区块链网络配置的`host`将是自定义的`host`。如果是使用自定义区块链网络的配置，这个值将忽略。
 
-
 # 4、创建`Configuration`
-继承`AbstractChaincodeConfiguration`创建 `Configuration`对象， 注入配置对象 `ChaincodeTemplate` 传入必要的参数，可以使用的系统配置方式实现类 `PropertiesConfiguration` 和缓存数据存储对象实现类`FileSystemKeyValueStore`。
-同时，在 `Configuration`对象上设置扫描的路径 `basePackages = "io.github.hooj0.springdata.fabric.chaincode.example"` 对应到具体的`package`。
-最后设置`EnableChaincodeRepositories` 开启 `spring-data-chaincode` 的 `repository`接口扫描方式。
+继承`AbstractChaincodeConfiguration`创建 `Configuration`对象， 注入配置对象 `ChaincodeTemplate` 传入必要的参数，可以使用的系统配置方式实现类 `PropertiesConfiguration` 和缓存数据存储对象实现类`FileSystemKeyValueStore`。 在 `Configuration`对象上设置扫描的路径 `basePackages = "io.github.hooj0.springdata.fabric.chaincode.example"` 对应到具体的`package`。设置`EnableChaincodeRepositories` 开启 `spring-data-chaincode` 的 `repository`接口扫描方式。
+
++ `@Configuration` 标记为配置对象
++ `@ComponentScan` 设置依赖注入的扫描环境
++ `@EnableChaincodeRepositories` 启用`Chaincode Repository`
+
 ```java
 @Configuration
 @ComponentScan(basePackages = "io.github.hooj0.springdata.fabric.chaincode.example")
@@ -126,7 +132,7 @@ public class Account extends AbstractEntity {
 # 6、编写核心的`CRUD Repository`
 `Repository` 可以完成 Chaincode 的 CRUD 操作，可以简单指定操作的 Chaincode、Channel、Org等必要信息，就可以完成一个智能合约的基本常用业务操作。
 + `@Channel` 配置通道信息，合约所运行的通道和组织
-+ `@Chaincode`
++ `@Chaincode` 配置`Chaincode`信息，合约名称、类型、版本、路径等
 
 ```java
 @Channel(name = "mychannel", org = "peerOrg1")
