@@ -401,7 +401,7 @@ public interface ProposalTransferRepository extends ChaincodeRepository<Account>
 ```
  
 # `Annotation` 更多示例展示
-除上面常用的 `Annotation` 使用方式外，还有其他的方式，具体可以参考 [`AnnotationedRepositoryTests`](spring-data-fabric-chaincode/src/test/java/io/github/hooj0/springdata/fabric/chaincode/repository/support/AnnotationedRepositoryTests.java) 这些注解都可以完成 智能合约的操作。
+除上面常用的 `Annotation` 使用方式外，还有其他的方式，具体可以参考 [`AnnotationedRepositoryTests`](spring-data-fabric-chaincode/src/test/java/io/github/hooj0/springdata/fabric/chaincode/repository/support/AnnotationedRepositoryTests.java)，通过这些注解，可以随意的组合方法前面、参数、返回值，完成不同要求的 智能合约的调用操作。
 
 ## 独立的注解 `Annotation`
 ```java
