@@ -400,5 +400,95 @@ public interface ProposalTransferRepository extends ChaincodeRepository<Account>
 }
 ```
  
+# `Annotation` 更多示例展示
+除上面常用的 `Annotation` 使用方式外，还有其他的方式，具体可以参考 [`AnnotationedRepositoryTests`](spring-data-fabric-chaincode/src/test/java/io/github/hooj0/springdata/fabric/chaincode/repository/support/AnnotationedRepositoryTests.java) 这些注解都可以完成 智能合约的操作。
+
+## 独立的注解 `Annotation`
+```java
+@Query(clientUser = "user1")
+String query(String account);
+
+@Query(clientUser = "user1", args = "b")
+String query();
+
+@Query(clientUser = "user1", func = "query", args = "b")
+String queryCustom();
+
+@Query(clientUser = "user1", func = "query", args = ":account")
+String queryExprssion(@Param("account") String account);
+
+@Query(clientUser = "user1", func = "query", args = "?2")
+String queryExprssion2(String param, String param2, String account);
+
+@Query(clientUser = "user1", func = "query", args = "b")
+ResultSet queryResult();
+
+@Query(clientUser = "user1", func = "query", args = "b")
+int queryInt();
+
+@Query(clientUser = "user1", func = "query", args = "b")
+void queryNull();
+
+@Query(clientUser = "user1", func = "query", args = "b")
+Person queryFor();
+
+@Query(clientUser = "user1", func = "query", args = ":#{#person.name}")
+Person queryForExpression(@Param("person") Person p);
+
+@Query(clientUser = "user1", func = "query")
+@Serialization
+Person queryForJSON(Person p);
+
+@Query(clientUser = "user1", func = "query", args = ":#{#person.name}")
+@Serialization(SerializationMode.DESERIALIZE)
+Person queryForJSONOPerson(@Param("person") Person p);
 
 
+
+@Invoke(clientUser = "user1", args = { "a", "b", "?0" })
+void move(int amount);
+
+@Invoke(clientUser = "user1")
+void move(String from, String to, int amount);
+
+@Invoke(clientUser = "user1", func = "move", args = { "a", "b", "?0" })
+void moveMethod(int amount);
+
+@Invoke(clientUser = "user1", func = "move")
+String moveString(String from, String to, int amount);
+
+@Invoke(clientUser = "user1", func = "move", args = { "a", "b", "?0" })
+ResultSet moveResult(int amount);
+
+@Invoke(clientUser = "user1", func = "move", args = { "a", "b", "?0" })
+CompletableFuture<TransactionEvent> moveFuture(int amount);
+
+@Invoke(clientUser = "user1", func = "move", args = { "a", "b", "?0" })
+TransactionEvent moveEvent(int amount);
+```
+
+## 统一的注解 `@Proposal`
+```java
+@Proposal(type = ProposalType.INSTALL, clientUser = "admin", waitTime = 2000L)
+void installMyCC();
+		
+@Proposal(type = ProposalType.INSTANTIATE, clientUser = "admin", waitTime = 5000L, func = "init", args = { "a", "?0", "b", "?1" })
+ResultSet instantiateMyCC(int aAmount, int bAmount);
+
+@Proposal(type = ProposalType.INSTALL, clientUser = "admin", waitTime = 2000L)
+@Install(chaincodeLocation = "gocc/sample_11", version = "v11.1")	// setter new version & chaincode location
+void installNewVersionMyCC();
+
+
+@Proposal(type = ProposalType.QUERY, clientUser = "user1", func = "query", args = "b")
+String queryProposal();
+
+@Proposal(type = ProposalType.QUERY, clientUser = "user1", args = "b")
+String query();
+
+@Proposal(type = ProposalType.INVOKE, clientUser = "user1", func = "move", args = { "b", "a", "?0" })
+String invokeProposal(int amount);
+
+@Proposal(type = ProposalType.INVOKE, clientUser = "user1", args = { "a", "b", "?0" })
+String move(int amount);
+```
