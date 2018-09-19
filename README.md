@@ -106,7 +106,12 @@ public class AccountConfiguration extends AbstractChaincodeConfiguration {
 ```
 
 # 5、构建实体对象
-实体对象可以用于在做`Chaincode CRUD`操作时的参数传递、`transient-map Ledger` 数据传递或保存、JSON格式数据传递的**序列化和反序列化**。在实体对象中可以使用注解`@Entity`、`@Field`、`@Transient`，分别代表实体对象、实体属性、和`TransientMap`数据缓存。
+实体对象可以用于在做`Chaincode CRUD`操作时的参数传递、`transient-map Ledger` 数据传递或保存、JSON格式数据传递的**序列化和反序列化**。
+在实体对象中可以使用注解:
++ `@Entity` 实体对象，用于在`repository`中和`Chaincode`交互进行`ORM`映射，并且可以做`JSON`的转换处理。
++ `@Field` 实体属性，用于配置属性的映射别名等
++ `@Transient` `TransientMap`数据缓存，做数据回传或瞬时存储
+
 ```java
 @Entity
 public class Account extends AbstractEntity {
@@ -130,7 +135,7 @@ public class Account extends AbstractEntity {
 ```	
 
 # 6、编写核心的`CRUD Repository`
-`Repository` 可以完成 Chaincode 的 CRUD 操作，可以简单指定操作的 Chaincode、Channel、Org等必要信息，就可以完成一个智能合约的基本常用业务操作。
+`Repository` 可以完成 `Chaincode` 的 `CRUD` 操作，可以简单指定操作的 `Chaincode`、`Channel`、`Org`等必要信息，就可以完成一个智能合约的基本常用业务操作。在`Service`中注入`Repository`后就可以使用常规的`API`接口完成`CRUD`操作。
 + `@Channel` 配置通道信息，合约所运行的通道和组织
 + `@Chaincode` 配置`Chaincode`信息，合约名称、类型、版本、路径等
 
