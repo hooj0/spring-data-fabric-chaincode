@@ -45,9 +45,38 @@ hyperledger.fabric.sdk.commons.endorsement.policy.file.path=chaincode-endorsemen
 hyperledger.fabric.sdk.commons.network.config.root.path=network_configs
 ```
 
+由于在` fabric-chaincode.properties` 中没有配置自定义的区块链网络，系统将在底层使用默认的网络配置，下面是使用默认的区块链网络配置信息：
+```properties
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.mspid=Org1MSP
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.caName=ca0
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.domname=org1.example.com
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.ca_location=http\://192.168.8.8\:7054
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.orderer_locations=orderer.example.com@grpc\://192.168.8.8\:7050
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.peer_locations=peer0.org1.example.com@grpc\://192.168.8.8\:7051, peer1.org1.example.com@grpc\://192.168.8.8\:7056
+hyperledger.fabric.sdk.commons.network.org.peerOrg1.eventhub_locations=peer0.org1.example.com@grpc\://192.168.8.8\:7053, peer1.org1.example.com@grpc\://192.168.8.8\:7058
+
+
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.mspid=Org2MSP
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.domname=org2.example.com
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.ca_location=http\://192.168.8.8\:8054
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.orderer_locations=orderer.example.com@grpc\://192.168.8.8\:7050
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.peer_locations=peer0.org2.example.com@grpc\://192.168.8.8\:8051, peer1.org2.example.com@grpc\://192.168.8.8\:8056
+hyperledger.fabric.sdk.commons.network.org.peerOrg2.eventhub_locations=peer0.org2.example.com@grpc\://192.168.8.8\:8053, peer1.org2.example.com@grpc\://192.168.8.8\:8058
+```
+上面的配置信息的IP地址取值于环境变量值 `HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST`, 通过**配置环境变量**来设置默认配置的`Host`。
+## 配置链接到区块链网络的HOST
+在运行程序的时候，需要设置环境变量，添加环境变量配置
+```sh
+export HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST=localhost
+# or remote ip address
+export HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST=192.168.99.100
+```
+当在环境变量中配置host后，默认的区块链网络配置的`host`将是自定义的`host`。如果是使用自定义区块链网络的配置，这个值将忽略。
+
+
 # 4、创建`Configuration`
-创建 `configuration`, 注入配置对象 `ChaincodeTemplate` 使用的配置对象`PropertiesConfiguration`和缓存数据存储对象`FileSystemKeyValueStore`。
-同时，设置扫描的 `basePackages = "io.github.hooj0.springdata.fabric.chaincode.example"` 对应到具体的`package`.
+继承`AbstractChaincodeConfiguration`创建 `Configuration`对象， 注入配置对象 `ChaincodeTemplate` 传入必要的参数，可以使用的系统配置方式实现类 `PropertiesConfiguration` 和缓存数据存储对象实现类`FileSystemKeyValueStore`。
+同时，在 `Configuration`对象上设置扫描的路径 `basePackages = "io.github.hooj0.springdata.fabric.chaincode.example"` 对应到具体的`package`。
 最后设置`EnableChaincodeRepositories` 开启 `spring-data-chaincode` 的 `repository`接口扫描方式。
 ```java
 @Configuration
@@ -71,7 +100,7 @@ public class AccountConfiguration extends AbstractChaincodeConfiguration {
 ```
 
 # 5、构建实体对象
-实体对象可以用于参数传递、`transient-map Ledger` 数据传递或保存、JSON格式数据传递的**序列化和反序列化**。在实体对象中可以使用注解`@Entity`、`@Field`、`@Transient`，分别代表实体对象、实体属性、和`TransientMap`数据缓存
+实体对象可以用于在做`Chaincode CRUD`操作时的参数传递、`transient-map Ledger` 数据传递或保存、JSON格式数据传递的**序列化和反序列化**。在实体对象中可以使用注解`@Entity`、`@Field`、`@Transient`，分别代表实体对象、实体属性、和`TransientMap`数据缓存。
 ```java
 @Entity
 public class Account extends AbstractEntity {
@@ -94,15 +123,24 @@ public class Account extends AbstractEntity {
 }
 ```	
 
-# 6、
+# 6、编写核心的`CRUD Repository`
+`Repository` 可以完成 Chaincode 的 CRUD 操作，可以简单指定操作的 Chaincode、Channel、Org等必要信息，就可以完成一个智能合约的基本常用业务操作。
++ `@Channel` 配置通道信息，合约所运行的通道和组织
++ `@Chaincode`
 
+```java
+@Channel(name = "mychannel", org = "peerOrg1")
+@Chaincode(name = "example_cc_go", type = Type.GO_LANG, version = "11.1", path = "github.com/example_cc")
+public interface AccountRepository extends DeployChaincodeRepository<Account> {
 
-# 配置链接到区块链网络的HOST
-在运行程序的时候，需要设置环境变量，添加环境变量配置
-```sh
-export HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST=localhost
-# or remote ip address
-export HYPERLEDGER_FABRIC_SDK_COMMONS_NETWORK_HOST=192.168.99.100
+	@Chaincode(name = "example_cc_go", version = "11.2")
+	@Channel(name = "mychannel", org = "peerOrg1")
+	public interface UpgradeRepository extends DeployChaincodeRepository<Account> {
+	}
+}
 ```
+
+
+
 
 
