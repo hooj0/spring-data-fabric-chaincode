@@ -74,6 +74,24 @@ public class BasicCRUDRepositoryTests {
 	private UpgradeRepository upgradeRepo;
 
 	@Test
+	public void testInstall() {
+		deployRepo.install(ProposalBuilder.install(), deployRepo.getConfig().getChaincodeRootPath());
+	}
+	
+	@Test
+	public void testInstantiate() {
+		try {
+			ProposalBuilder.InstantiateProposal proposal = ProposalBuilder.instantiate();
+			proposal.endorsementPolicyFile(Paths.get(deployRepo.getConfig().getEndorsementPolicyFilePath()).toFile());
+			
+			ResultSet rs = deployRepo.instantiate(proposal, "init", "a", 500, "b", 300);
+			System.out.println(rs);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
 	public void testInvoke() {
 		
 		ProposalBuilder.InvokeProposal invokeProposal = ProposalBuilder.invoke();
@@ -90,26 +108,6 @@ public class BasicCRUDRepositoryTests {
 			
 			System.out.println(txRepo.query(proposal, "query", "a"));
 			System.out.println(txRepo.query(proposal, "query", "b"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Test
-	public void testInstall() {
-		
-		deployRepo.install(ProposalBuilder.install(), deployRepo.getConfig().getChaincodeRootPath());
-	}
-	
-	@Test
-	public void testInstantiate() {
-		
-		try {
-			ProposalBuilder.InstantiateProposal proposal = ProposalBuilder.instantiate();
-			proposal.endorsementPolicyFile(Paths.get(deployRepo.getConfig().getEndorsementPolicyFilePath()).toFile());
-			
-			ResultSet rs = deployRepo.instantiate(proposal, "init", "a", 500, "b", 300);
-			System.out.println(rs);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
