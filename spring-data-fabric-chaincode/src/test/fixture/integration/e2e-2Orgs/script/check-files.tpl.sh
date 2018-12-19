@@ -3,7 +3,7 @@
 set -euo pipefail
 trap "echo 'error: Script failed: see failed command above'" ERR
 
-ORG_HYPERLEDGER_FABRIC_SDKTEST_INTEGRATIONTESTS_CA_TLS=
+ORG_HYPERLEDGER_FABRIC_SDKTEST_INTEGRATIONTESTS_CA_TLS=true
 
 V11_IDENTITIES_ALLOWREMOVE=--cfg.identities.allowremove
 V11_AFFILIATIONS_ALLOWREMOVE=--cfg.affiliations.allowremove
