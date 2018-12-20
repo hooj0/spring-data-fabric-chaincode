@@ -130,11 +130,17 @@ public interface ProposalBuilder {
 	@Getter
 	final class InstallProposal extends Proposal {
 		private String upgradeVersion;
+		private File chaincodeMetaINF;
 		
 		private InstallProposal() {}
 		
 		public InstallProposal upgradeVersion(String upgradeVersion) {
 			this.upgradeVersion = upgradeVersion;
+			return this;
+		}
+		
+		public InstallProposal chaincodeMetaINF(File chaincodeMetaINF) {
+			this.chaincodeMetaINF = chaincodeMetaINF;
 			return this;
 		}
 	}
@@ -147,6 +153,8 @@ public interface ProposalBuilder {
 		private InputStream endorsementPolicyInputStream;
 		/** 背书策略 */
 		private ChaincodeEndorsementPolicy endorsementPolicy;
+		/** 链码集合配置 */
+		private File collectionConfiguration;
 		
 		private InstantiateProposal() {}
 		
@@ -162,6 +170,11 @@ public interface ProposalBuilder {
 		
 		public InstantiateProposal endorsementPolicy(ChaincodeEndorsementPolicy endorsementPolicy) {
 			this.endorsementPolicy = endorsementPolicy;
+			return this;
+		}
+
+		public InstantiateProposal collectionConfiguration(File collectionConfiguration) {
+			this.collectionConfiguration = collectionConfiguration;
 			return this;
 		}
 	}
