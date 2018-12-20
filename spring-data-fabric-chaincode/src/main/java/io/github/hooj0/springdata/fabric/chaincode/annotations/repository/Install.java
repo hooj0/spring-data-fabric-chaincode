@@ -41,4 +41,7 @@ public @interface Install {
 	
 	/** 安装升级的版本，在升级版本时使用 */
 	String version() default "";
+	
+	/** Chaincode META-INF 目录的配置 */
+	String metaINF() default "";
 }
