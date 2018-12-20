@@ -46,4 +46,7 @@ public @interface Instantiate {
 	/** HFClient 客户端上下文用户  */
 	@AliasFor(annotation = Proposal.class, attribute = "clientUser")
 	String clientUser() default "";
+	
+	/** Chaincode 集合配置路径 */
+	String collectionConfiguration() default "";
 }
