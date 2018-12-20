@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hyperledger.fabric.sdk.ChaincodeCollectionConfiguration;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 import org.springframework.data.repository.query.ResultProcessor;
@@ -11,10 +12,13 @@ import org.springframework.data.repository.query.ReturnedType;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
+import com.google.common.io.Files;
 
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Install;
 import io.github.hooj0.springdata.fabric.chaincode.annotations.repository.Instantiate;
@@ -101,21 +105,25 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		
 		Object[] conditionValues = createQuery(accessor, parameterValues);
 		conditionValues = Optional.fromNullable(conditionValues).or(parameterValues);
-		
 		log.info("query string params: {}", new Object[] { conditionValues });
 		
 		ChaincodeExecutor executor = new ChaincodeExecutor(parameterValues, conditionValues, processor.getReturnedType());
 		
-		if (method.hasInstallAnnotated()) {
-			return executor.executeInstall();
-		} else if (method.hasInstantiateAnnotated()) {
-			return executor.executeInstaantiate();
-		} else if (method.hasInvokeAnnotated()) {
-			return executor.executeInvoke();
-		} else if (method.hasQueryAnnotated()) {
-			return executor.executeQuery();
-		} else if (method.hasUpgradeAnnotated()) {
-			return executor.executeUpgrade();
+		try {
+			if (method.hasInstallAnnotated()) {
+				return executor.executeInstall();
+			} else if (method.hasInstantiateAnnotated()) {
+				return executor.executeInstantiate();
+			} else if (method.hasInvokeAnnotated()) {
+				return executor.executeInvoke();
+			} else if (method.hasQueryAnnotated()) {
+				return executor.executeQuery();
+			} else if (method.hasUpgradeAnnotated()) {
+				return executor.executeUpgrade();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new ChaincodeOperationException(e);
 		} 
 		
 		throw new ChaincodeUnsupportedOperationException("Unknow Support has not @Annotation implemented yet.");
@@ -132,7 +140,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			this.returnedType = returnedType;
 		}
 		
-		protected Object executeInstall() {
+		protected Object executeInstall() throws Exception {
 			Install install = method.getInstallAnnotated();
 			InstallCriteria criteria = new InstallCriteria(method.getCriteria());
 			criteria.setTransientData(transformTransientData(parameterValues));
@@ -140,6 +148,9 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			String chaincodeLocation = null;
 			if (install != null) {
 				criteria.setChaincodeUpgradeVersion(install.version());
+				if (!Strings.isNullOrEmpty(install.metaINF())) {
+					criteria.setChaincodeMetaINF(new File(install.metaINF()));
+				}
 				chaincodeLocation = install.chaincodeLocation();
 			} 
 			
@@ -156,13 +167,15 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			return installOperation(criteria, conditionValues, returnedType, chaincodeFile);
 		} 
 		
-		private Object executeInstaantiate() {
+		private Object executeInstantiate() throws Exception {
 			Instantiate instantiate = method.getInstantiateAnnotated();
 			InstantiateCriteria criteria = new InstantiateCriteria(method.getCriteria());
 			criteria.setTransientData(transformTransientData(parameterValues));
 
 			String endorsementPolicyFile = null;
 			if (instantiate != null) {
+				File collectionFile = getCollectionFile(instantiate.collectionConfiguration());
+				criteria.setCollectionConfiguration(getCollectionConfiguration(collectionFile));
 				endorsementPolicyFile = instantiate.endorsementPolicyFile();
 			}
 			criteria.setEndorsementPolicyFile(getPolicyFile(endorsementPolicyFile));
@@ -176,13 +189,15 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			return instantiateOperation(criteria, conditionValues, returnedType, proposal.func());
 		} 
 		
-		private Object executeUpgrade() {
+		private Object executeUpgrade() throws Exception {
 			Upgrade upgrade = method.getUpgradeAnnotated();
 			UpgradeCriteria criteria = new UpgradeCriteria(method.getCriteria());
 			criteria.setTransientData(transformTransientData(parameterValues));
 			
 			String endorsementPolicyFile = null;
 			if (upgrade != null) {
+				File collectionFile = getCollectionFile(upgrade.collectionConfiguration());
+				criteria.setCollectionConfiguration(getCollectionConfiguration(collectionFile));
 				endorsementPolicyFile = upgrade.endorsementPolicyFile();
 			}
 			
@@ -213,6 +228,7 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 		
 		private Object executeQuery() {
 			QueryCriteria criteria = new QueryCriteria(method.getCriteria());
+			criteria.setTransientData(transformTransientData(parameterValues));
 			
 			Proposal proposal = method.getProposalAnnotated();
 			this.afterCriteriaSet(criteria, proposal);
@@ -229,6 +245,36 @@ public class StringBasedChaincodeQuery extends AbstractChaincodeQuery {
 			} 
 			
 			return policyFile;
+		}
+
+		private File getCollectionFile(String collectionConfigFile) {
+			if (Strings.isNullOrEmpty(collectionConfigFile)) {
+				return null;
+			}
+			
+			File configFile = new File(collectionConfigFile);
+			if (!configFile.exists()) {
+				configFile = Paths.get(config.getCommonRootPath(), collectionConfigFile).toFile();
+				log.warn("collection config directory '{}' does not exist, Try to bring the default prefix path: {}", collectionConfigFile, configFile);
+			} 
+			
+			return configFile;
+		}
+		
+		private ChaincodeCollectionConfiguration getCollectionConfiguration(File collectionFile) throws Exception {
+			if (collectionFile == null) {
+				return null;
+			}
+			log.info("chaincode collection config file location：{}", collectionFile.getAbsolutePath());
+
+			String suffix = Files.getFileExtension(collectionFile.getName());
+			if ("yaml".equalsIgnoreCase(suffix) || "yml".equalsIgnoreCase(suffix)) {
+				return ChaincodeCollectionConfiguration.fromYamlFile(collectionFile);
+			} else if ("json".equalsIgnoreCase(suffix)) {
+				return ChaincodeCollectionConfiguration.fromJsonFile(collectionFile);
+			} else {
+				throw new IllegalArgumentException("suffix '" + suffix + "' is unsupport configuration.");
+			}
 		}
 		
 		private void afterTransactionSet(TransactionsOptions options, Transaction transaction) {
