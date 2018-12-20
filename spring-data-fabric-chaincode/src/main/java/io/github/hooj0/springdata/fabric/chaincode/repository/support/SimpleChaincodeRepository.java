@@ -182,7 +182,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public Collection<ProposalResponse> install(InstallProposal proposal, String chaincodeSourceLocation) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
@@ -192,7 +191,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public Collection<ProposalResponse> install(InstallProposal proposal, File chaincodeSourceFile) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
@@ -202,7 +200,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public Collection<ProposalResponse> install(InstallProposal proposal, InputStream chaincodeInputStream) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
@@ -212,7 +209,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public ResultSet installFor(InstallProposal proposal, String chaincodeSourceLocation) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
@@ -222,7 +218,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public ResultSet installFor(InstallProposal proposal, File chaincodeSourceFile) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
@@ -232,7 +227,6 @@ public class SimpleChaincodeRepository<T> extends AbstractChaincodeRepository<T>
 	@Override
 	public ResultSet installFor(InstallProposal proposal, InputStream chaincodeInputStream) {
 		InstallCriteria installCriteria = new InstallCriteria(criteria);
-		installCriteria.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
 		
 		afterCriteriaSet(proposal, installCriteria);
 		
