@@ -10,25 +10,39 @@ services:
     image: hyperledger/fabric-ca${IMAGE_TAG_FABRIC_CA}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      
+      - FABRIC_CA_SERVER_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca0
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8bb405162239ad7872683ad6d361d935953d80afa1bef9607c20bcddd568849c_sk
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/8bb405162239ad7872683ad6d361d935953d80afa1bef9607c20bcddd568849c_sk
+      - FABRIC_CA_SERVER_REGISTRY_MAXENROLLMENTS=-1
     ports:
       - "7054:7054"
-    command: /bin/bash -c "./script/check-files.sh ca0"
+    command: bash -c 'cp -R /tmp/msp /etc/hyperledger/fabric-ca-server; mv /etc/hyperledger/fabric-ca-server/msp/*PublicKey /etc/hyperledger/fabric-ca-server; fabric-ca-server start -b admin:adminpw ${V11_IDENTITIES_ALLOWREMOVE} ${V11_AFFILIATIONS_ALLOWREMOVE} ${ORG_HYPERLEDGER_FABRIC_SDKTEST_INTEGRATIONTESTS_CA_TLS} -d'
 
     volumes:
       - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config:ro
-      - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
+      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org3.example.com/msp/:/tmp/msp:ro
     container_name: ca_peerOrg1
 
   ca1:
     image: hyperledger/fabric-ca${IMAGE_TAG_FABRIC_CA}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/3aace1f98af27e0ead214bb0ed34ad4d9a5fbc583bc48ac962995c8ad283381e_sk
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/3aace1f98af27e0ead214bb0ed34ad4d9a5fbc583bc48ac962995c8ad283381e_sk
+      - FABRIC_CA_SERVER_REGISTRY_MAXENROLLMENTS=-1
     ports:
       - "8054:7054"
-    command: /bin/bash -c "./script/check-files.sh ca1"
+    command: bash -c 'cp -R /tmp/msp /etc/hyperledger/fabric-ca-server; mv /etc/hyperledger/fabric-ca-server/msp/*PublicKey /etc/hyperledger/fabric-ca-server; fabric-ca-server start -b admin:adminpw ${ORG_HYPERLEDGER_FABRIC_SDKTEST_INTEGRATIONTESTS_CA_TLS} -d'
     volumes:
       - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server-config:ro
-      - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
+      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org4.example.com/msp/:/tmp/msp:ro
     container_name: ca_peerOrg2
 
   orderer.example.com:
@@ -51,14 +65,12 @@ services:
       - GRPC_VERBOSITY=debug
       - ORDERER_GENERAL_AUTHENTICATION_TIMEWINDOW=3600s #Not for production -- remove.
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
-    command: /bin/bash -c "/script/check-files.sh orderer"
+    command: orderer
     volumes:
      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/channel-artifacts:/etc/hyperledger/configtx:ro
      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer:ro
      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1:ro
      - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/msp/peerOrg2:ro
-     - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
-
     ports:
       - 7050:7050
 
@@ -79,13 +91,11 @@ services:
     volumes:
       - /var/run/:/host/var/run/
       - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peer:ro
-      - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
     ports:
       - 7051:7051
       - 7053:7053
     depends_on:
       - orderer.example.com
-    #command: /bin/bash -c '/script/check-files.sh 4'  
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com
@@ -103,14 +113,12 @@ services:
     volumes:
          - /var/run/:/host/var/run/
          - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/:/etc/hyperledger/msp/peer:ro
-         - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
     ports:
        - 7056:7051
        - 7058:7053
     depends_on:
        - orderer.example.com
        - peer0.org1.example.com
-    #command: /bin/bash -c '/script/check-files.sh 5'    
 
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
@@ -120,7 +128,7 @@ services:
     environment:
       - CORE_PEER_ID=peer0.org2.example.com
       - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:8051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
 #      - CORE_PEER_GOSSIP_ORGLEADER=true
       - CORE_PEER_LOCALMSPID=Org2MSP
 #      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/msp/peer/msp/cacerts/ca.org2.example.com-cert.pem
@@ -128,13 +136,11 @@ services:
     volumes:
       - /var/run/:/host/var/run/
       - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/msp/peer:ro
-      - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
     ports:
       - 8051:7051
       - 8053:7053
     depends_on:
       - orderer.example.com
-    #command: /bin/bash -c '/script/check-files.sh 6'   
 
   peer1.org2.example.com:
     container_name: peer1.org2.example.com
@@ -144,7 +150,7 @@ services:
     environment:
       - CORE_PEER_ID=peer1.org2.example.com
       - CORE_PEER_ADDRESS=peer1.org2.example.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.example.com:8051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.example.com:7051
 #      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:8051
       - CORE_PEER_LOCALMSPID=Org2MSP
 #      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/msp/peer/msp/cacerts/ca.org2.example.com-cert.pem
@@ -152,14 +158,12 @@ services:
     volumes:
          - /var/run/:/host/var/run/
          - ./e2e-2Orgs/${FAB_CONFIG_GEN_VERS}/crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/:/etc/hyperledger/msp/peer:ro
-         - ./e2e-2Orgs/script/${FAB_CONFIG_GEN_VERS}:/script
     ports:
        - 8056:7051
        - 8058:7053
     depends_on:
        - orderer.example.com
        - peer0.org2.example.com
-    #command: /bin/bash -c '/script/check-files.sh 7'  
 
   configtxlator:
       image: hyperledger/fabric-tools${IMAGE_TAG_FABRIC}
