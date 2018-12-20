@@ -1,23 +1,31 @@
 package io.github.hooj0.springdata.fabric.chaincode.repository.support;
 
+import java.io.File;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hyperledger.fabric.sdk.ChaincodeCollectionConfiguration;
 import org.hyperledger.fabric.sdk.User;
 import org.springframework.util.Assert;
+
+import com.google.common.io.Files;
 
 import io.github.hooj0.fabric.sdk.commons.config.FabricConfiguration;
 import io.github.hooj0.fabric.sdk.commons.core.ChaincodeDeployOperations;
 import io.github.hooj0.fabric.sdk.commons.core.ChaincodeTransactionOperations;
+import io.github.hooj0.fabric.sdk.commons.core.execution.option.InstallOptions;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.InstantiateOptions;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.Options;
 import io.github.hooj0.fabric.sdk.commons.core.execution.option.TransactionsOptions;
 import io.github.hooj0.fabric.sdk.commons.domain.Organization;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeOperationException;
+import io.github.hooj0.springdata.fabric.chaincode.ChaincodeUnsupportedOperationException;
 import io.github.hooj0.springdata.fabric.chaincode.core.ChaincodeOperations;
 import io.github.hooj0.springdata.fabric.chaincode.core.query.Criteria;
 import io.github.hooj0.springdata.fabric.chaincode.repository.ChaincodeRepository;
 import io.github.hooj0.springdata.fabric.chaincode.repository.DeployChaincodeRepository;
+import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstallProposal;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.InstantiateProposal;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.Proposal;
 import io.github.hooj0.springdata.fabric.chaincode.repository.support.creator.ProposalBuilder.TransactionProposal;
@@ -52,7 +60,6 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 	
 	public AbstractChaincodeRepository(Criteria criteria, ChaincodeEntityInformation<T, ?> entityInformation, ChaincodeOperations operations) {
 		this(operations);
-		
 		Assert.notNull(criteria, "criteria must not be null!");
 
 		this.entityInformation = entityInformation;
@@ -78,6 +85,13 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 
 			afterInstantiateSet(instantiateProposal, instantiateOptions);
 		}
+		
+		if (proposal instanceof InstallProposal && options instanceof InstallOptions) {
+			InstallProposal installProposal = (InstallProposal) proposal;
+			InstallOptions installOptions = (InstallOptions) options;
+
+			afterInstallSet(installProposal, installOptions);
+		}
 	}
 	
 	protected void afterOptionSet(Proposal proposal, Options options) {
@@ -99,6 +113,12 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 		options.setEndorsementPolicy(proposal.getEndorsementPolicy());
 		options.setEndorsementPolicyFile(proposal.getEndorsementPolicyFile());
 		options.setEndorsementPolicyInputStream(proposal.getEndorsementPolicyInputStream());
+		options.setCollectionConfiguration(getCollectionConfiguration(proposal.getCollectionConfiguration()));
+	}
+	
+	protected void afterInstallSet(InstallProposal proposal, InstallOptions options) {
+		options.setChaincodeUpgradeVersion(proposal.getUpgradeVersion());
+		options.setChaincodeMetaINF(proposal.getChaincodeMetaINF());
 	}
 	
 	protected User getUser(String user) {
@@ -110,6 +130,27 @@ public abstract class AbstractChaincodeRepository<T> implements ChaincodeReposit
 		}
 		
 		return null;
+	}
+	
+	private ChaincodeCollectionConfiguration getCollectionConfiguration(File collectionFile) {
+		if (collectionFile == null) {
+			return null;
+		}
+		log.info("chaincode collection config file location：{}", collectionFile.getAbsolutePath());
+
+		String suffix = Files.getFileExtension(collectionFile.getName());
+		try {
+			if ("yaml".equalsIgnoreCase(suffix) || "yml".equalsIgnoreCase(suffix)) {
+				return ChaincodeCollectionConfiguration.fromYamlFile(collectionFile);
+			} else if ("json".equalsIgnoreCase(suffix)) {
+				return ChaincodeCollectionConfiguration.fromJsonFile(collectionFile);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw new ChaincodeOperationException("suffix '" + suffix + "' is unsupport configuration.");
+		}
+		
+		throw new ChaincodeUnsupportedOperationException("suffix '" + suffix + "' is unsupport configuration.");
 	}
 	
 	@Override
