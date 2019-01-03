@@ -1,13 +1,19 @@
 # Spring data `fabric chaincode` Framework
 Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK.
 
+# 发布版本
++ [`v1.3 - 2018-12-20`](https://github.com/hooj0/spring-data-fabric-chaincode/tree/v1.3-release)
+    - 增加私有数据功能支持
+    - 增加`META-INF`配置支持
+    - 增加 `Java Chaincode` 支持
+
 # 运行环境
 + `fabric-sdk-java` v1.3+
 + `spring data` 2.1.0+
 + `jdk` 8+
 
-**extra jar**
-+ `fabric-sdk-commons`  v1.3+
+**Extra JAR**
++ [`fabric-sdk-commons`  v1.3+](https://github.com/hooj0/fabric-sdk-java-commons)
 + `spring-data-fabric-chaincode`  v1.3+
 
 # 添加依赖
