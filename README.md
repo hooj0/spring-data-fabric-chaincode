@@ -2,13 +2,13 @@
 Quickly develop Chancode client applications based on SpringData and Hyperledger Fabric Chaincode SDK.
 
 # 运行环境
-+ `fabric-sdk-java` v1.1+
++ `fabric-sdk-java` v1.3+
 + `spring data` 2.1.0+
 + `jdk` 8+
 
 **extra jar**
-+ `fabric-sdk-commons`  v1.1+
-+ `spring-data-fabric-chaincode`  v1.1+
++ `fabric-sdk-commons`  v1.3+
++ `spring-data-fabric-chaincode`  v1.3+
 
 # 添加依赖
 在 `pom.xml` 中添加如下配置
@@ -16,7 +16,7 @@ Quickly develop Chancode client applications based on SpringData and Hyperledger
 <dependency>
 	<groupId>spring.data.fabric.chaincode</groupId>
 	<artifactId>spring-data-fabric-chaincode</artifactId>
-	<version>1.0.2</version>
+	<version>1.3.0</version>
 </dependency>
 ```		
 
@@ -25,7 +25,7 @@ Quickly develop Chancode client applications based on SpringData and Hyperledger
 ```properties
 #Sat Jul 28 20:10:31 CST 2018
 # hyperledger fabric 生成的configtx版本 
-fabric.network.configtx.version=v1.1
+fabric.network.configtx.version=v1.3
 
 # 管理员 和 普通用户
 hyperledger.fabric.sdk.commons.network.ca.admin.name=admin
