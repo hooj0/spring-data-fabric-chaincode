@@ -55,11 +55,11 @@ public enum JacksonChaincodeEntitySerialization implements ChaincodeEntitySerial
 		System.err.println("e->" + method.getResultProcessor().getReturnedType().getReturnedType());
 		System.out.println("type ->" + method.getReturnType().getRawTypeInformation().getType());
 		
-		1->com.masget.transaction.chaincode.article.entity.ArticleEntity
-		4->class com.masget.transaction.chaincode.article.entity.ArticleEntity
-		5->class com.masget.transaction.chaincode.article.entity.ArticleEntity
-		b2->class com.masget.transaction.chaincode.article.entity.ArticleEntity
-		e->class com.masget.transaction.chaincode.article.entity.ArticleEntity
+		1->com.hoojo.transaction.chaincode.article.entity.ArticleEntity
+		4->class com.hoojo.transaction.chaincode.article.entity.ArticleEntity
+		5->class com.hoojo.transaction.chaincode.article.entity.ArticleEntity
+		b2->class com.hoojo.transaction.chaincode.article.entity.ArticleEntity
+		e->class com.hoojo.transaction.chaincode.article.entity.ArticleEntity
 		type ->interface java.util.List
 		 */
 		
